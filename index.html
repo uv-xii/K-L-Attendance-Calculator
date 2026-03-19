@@ -693,16 +693,16 @@
             <span style="color:${cp.col}">${cp.label}</span>
           </div>
           <div class="inp-grp">
-            <div class="inp-lbl">Attended</div>
-            <input class="num-inp" type="number" min="0" placeholder="e.g. 18"
-              id="inp-${s.id}-${cp.k}a"
-              value="${av}" onchange="upV(${s.id},'${cp.k}a',this.value)">
-          </div>
-          <div class="inp-grp">
             <div class="inp-lbl">Conducted</div>
             <input class="num-inp" type="number" min="0" placeholder="e.g. 20"
               id="inp-${s.id}-${cp.k}t"
               value="${tv}" onchange="upV(${s.id},'${cp.k}t',this.value)">
+          </div>
+          <div class="inp-grp">
+            <div class="inp-lbl">Attended</div>
+            <input class="num-inp" type="number" min="0" placeholder="e.g. 18"
+              id="inp-${s.id}-${cp.k}a"
+              value="${av}" onchange="upV(${s.id},'${cp.k}a',this.value)">
           </div>
           <div class="indiv-pct${ip?' filled':''}">${ip||'—'}</div>
         </div>`;
