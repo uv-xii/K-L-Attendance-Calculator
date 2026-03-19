@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KL Attendance Calculator</title>
+  <meta name="description" content="KL University attendance calculator with bunk counter and target tracker."/>
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3123300227513455" crossorigin="anonymous"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#07090f; --s1:#0e111a; --s2:#141824; --s3:#1b2030;
+      --bd:#1f2638; --bd2:#2a3249;
+      --acc:#5b52ff;
+      --cl:#5b52ff; --cp:#ff5c7d; --ct:#f59e0b; --cs:#36d68a;
+      --txt:#e2e6f3; --txt2:#7e8ba8; --txt3:#3d4761;
+      --safe:#36d68a; --warn:#f59e0b; --danger:#ff4560;
+      --r:14px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;}
+
+    /* ── ANIMATED BACKGROUND CANVAS ── */
+    #bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
+
+    .wrap{max-width:1080px;margin:0 auto;padding:0 20px 80px;position:relative;z-index:1;}
+
+    /* ── NAV ── */
+    nav{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:18px 0 14px;border-bottom:1px solid var(--bd);
+      animation:fadeDown 0.6s ease both;
+    }
+    @keyframes fadeDown{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
+    .logo{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;background:linear-gradient(135deg,#fff,#a09bff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .nav-ext{display:inline-flex;align-items:center;gap:7px;background:rgba(91,82,255,0.15);border:1px solid rgba(91,82,255,0.3);border-radius:100px;padding:6px 15px;font-size:12px;font-weight:500;color:#a09bff;text-decoration:none;transition:all 0.2s;}
+    .nav-ext:hover{background:rgba(91,82,255,0.28);transform:translateY(-1px);}
+
+    /* ── HERO ── */
+    .hero{padding:52px 0 32px;text-align:center;}
+    .hero-badge{
+      display:inline-flex;align-items:center;gap:7px;
+      background:rgba(54,214,138,0.08);border:1px solid rgba(54,214,138,0.2);
+      border-radius:100px;padding:5px 14px;font-size:11px;font-weight:600;
+      letter-spacing:0.1em;text-transform:uppercase;color:#36d68a;
+      margin-bottom:18px;
+      animation:fadeUp 0.7s 0.1s ease both;
+    }
+    .dot-pulse{width:6px;height:6px;border-radius:50%;background:#36d68a;animation:pulse 2s infinite;}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.35;transform:scale(1.6);}}
+
+    h1{
+      font-family:'Syne',sans-serif;
+      font-size:clamp(28px,5vw,52px);font-weight:800;line-height:1.08;
+      background:linear-gradient(130deg,#fff 30%,#a09bff 80%,#ff5c7d);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      margin-bottom:12px;
+      animation:fadeUp 0.7s 0.2s ease both;
+      background-size:200% auto;
+      animation:fadeUp 0.7s 0.2s ease both, gradientShift 4s 1s ease-in-out infinite alternate;
+    }
+    @keyframes gradientShift{
+      0%{background-position:0% center;}
+      100%{background-position:100% center;}
+    }
+    .hero-sub{
+      color:var(--txt2);font-size:15px;max-width:420px;
+      margin:0 auto 0;line-height:1.65;
+      animation:fadeUp 0.7s 0.3s ease both;
+    }
+
+    /* typewriter marquee line */
+    .marquee-wrap{
+      overflow:hidden;
+      margin:18px auto 0;
+      max-width:520px;
+      border:1px solid rgba(91,82,255,0.2);
+      border-radius:100px;
+      background:rgba(91,82,255,0.06);
+      padding:7px 20px;
+      animation:fadeUp 0.7s 0.5s ease both;
+    }
+    .marquee-track{
+      display:flex;align-items:center;justify-content:center;gap:8px;
+    }
+    .marquee-text{
+      font-size:12px;font-weight:600;color:#a09bff;
+      letter-spacing:0.04em;
+    }
+    .marquee-dot{
+      width:4px;height:4px;border-radius:50%;
+      background:rgba(91,82,255,0.4);flex-shrink:0;
+    }
+
+    /* section title animation */
+    .sec-title{
+      font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:16px;
+      position:relative;display:inline-block;
+    }
+    .sec-title::after{
+      content:'';position:absolute;left:0;bottom:-4px;
+      height:2px;width:0;background:linear-gradient(90deg,var(--acc),var(--cs));
+      border-radius:100px;transition:width 0.5s ease;
+    }
+    .sec-title.visible::after{width:100%;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+
+    /* ── AD ── */
+    .ad-wrap{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);padding:8px;margin:18px 0;text-align:center;}
+    .ad-lbl{font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:0.1em;display:block;margin-bottom:4px;}
+
+    /* ── CONTROLS BAR ── */
+    .controls{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:12px;margin-bottom:20px;flex-wrap:wrap;
+      animation:fadeUp 0.6s 0.4s ease both;
+    }
+    .target-wrap{display:flex;align-items:center;gap:10px;}
+    .target-lbl{font-size:13px;color:var(--txt2);white-space:nowrap;}
+    .target-btns{display:flex;gap:6px;}
+    .tbtn{
+      padding:6px 15px;border-radius:100px;font-size:12px;font-weight:600;
+      border:1px solid var(--bd2);background:transparent;color:var(--txt2);
+      cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;
+    }
+    .tbtn:hover{border-color:rgba(91,82,255,0.4);color:#a09bff;}
+    .tbtn.on{background:rgba(91,82,255,0.18);border-color:rgba(91,82,255,0.5);color:#a09bff;}
+
+    .btn-calculate{
+      display:inline-flex;align-items:center;gap:8px;
+      background:var(--safe);color:#07090f;border:none;border-radius:100px;
+      padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer;
+      font-family:'Syne',sans-serif;transition:all 0.2s;
+      box-shadow:0 0 20px rgba(54,214,138,0.25);
+    }
+    .btn-calculate:hover{background:#4aeaa0;transform:translateY(-2px);box-shadow:0 4px 24px rgba(54,214,138,0.4);}
+    .btn-calculate:active{transform:translateY(0);}
+
+    /* ── CARDS GRID ── */
+    .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:14px;}
+    @media(max-width:500px){.cards{grid-template-columns:1fr;}}
+
+    /* card entrance animation */
+    @keyframes cardIn{from{opacity:0;transform:translateY(12px) scale(0.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+
+    .card{
+      background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);
+      overflow:hidden;transition:border-color 0.3s,box-shadow 0.3s,transform 0.2s;
+      animation:cardIn 0.35s ease both;
+    }
+    .card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,0.4);}
+    .card.safe-bd{border-color:rgba(54,214,138,0.45);box-shadow:0 0 20px rgba(54,214,138,0.06);}
+    .card.warn-bd{border-color:rgba(245,158,11,0.45);box-shadow:0 0 20px rgba(245,158,11,0.06);}
+    .card.dng-bd{border-color:rgba(255,69,96,0.45);box-shadow:0 0 20px rgba(255,69,96,0.06);}
+
+    /* card header */
+    .card-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--bd);gap:8px;}
+    .card-hd-l{display:flex;align-items:center;gap:8px;flex:1;min-width:0;}
+    .sub-inp{
+      background:none;border:none;border-bottom:1px dashed var(--bd2);
+      padding-bottom:2px;color:var(--txt);font-family:'Syne',sans-serif;
+      font-size:14px;font-weight:700;outline:none;flex:1;min-width:0;max-width:220px;
+      transition:border-color 0.2s;
+    }
+    .sub-inp:focus{border-color:var(--acc);}
+    .sub-inp::placeholder{color:var(--txt3);font-weight:400;}
+    .card-hd-r{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+
+    /* result pill */
+    .pill{
+      display:inline-flex;align-items:center;border-radius:100px;
+      padding:4px 14px;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;
+      border:1px solid transparent;white-space:nowrap;
+      transition:all 0.3s;
+    }
+    .pill.safe{background:rgba(54,214,138,0.12);border-color:rgba(54,214,138,0.3);color:var(--safe);}
+    .pill.warn{background:rgba(245,158,11,0.12);border-color:rgba(245,158,11,0.3);color:var(--warn);}
+    .pill.dng{background:rgba(255,69,96,0.12);border-color:rgba(255,69,96,0.3);color:var(--danger);}
+    .pill.none{background:var(--s2);border-color:var(--bd);color:var(--txt3);font-size:12px;font-weight:500;}
+
+    .rm-btn{
+      background:none;border:1px solid rgba(255,69,96,0.2);border-radius:7px;
+      color:var(--danger);padding:3px 9px;font-size:11px;cursor:pointer;
+      font-family:'DM Sans',sans-serif;transition:all 0.15s;
+    }
+    .rm-btn:hover{background:rgba(255,69,96,0.12);transform:scale(1.05);}
+
+    /* progress bar */
+    .prog{height:3px;background:var(--bd);overflow:hidden;}
+    .prog-fill{height:100%;transition:width 0.6s cubic-bezier(0.4,0,0.2,1);}
+    .prog-fill.safe{background:linear-gradient(90deg,var(--safe),#00c9a7);}
+    .prog-fill.warn{background:linear-gradient(90deg,var(--warn),#ff8c42);}
+    .prog-fill.dng{background:linear-gradient(90deg,var(--danger),#ff8fa3);}
+    .prog-fill.none{width:0!important;}
+
+    /* component rows */
+    .comps{padding:2px 0;}
+    .comp-row{
+      display:grid;grid-template-columns:100px 1fr 1fr 50px;
+      align-items:center;padding:10px 16px;border-bottom:1px solid var(--bd);
+      transition:background 0.15s;
+    }
+    .comp-row:last-child{border-bottom:none;}
+    .comp-row:hover{background:rgba(255,255,255,0.015);}
+    .comp-name{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;}
+    .cdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;transition:box-shadow 0.3s;}
+    .inp-grp{display:flex;flex-direction:column;gap:2px;padding:0 8px;}
+    .inp-lbl{font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;}
+    .num-inp{
+      background:var(--s2);border:1px solid var(--bd);border-radius:8px;
+      padding:7px 8px;color:var(--txt);font-family:'DM Sans',sans-serif;
+      font-size:14px;font-weight:600;width:100%;outline:none;
+      transition:border-color 0.2s,background 0.2s,transform 0.1s;
+    }
+    .num-inp:focus{border-color:var(--acc);background:var(--s3);transform:scale(1.02);}
+    .num-inp::-webkit-inner-spin-button{-webkit-appearance:none;}
+    .num-inp::placeholder{color:var(--txt3);font-weight:400;font-size:13px;}
+    .num-inp.err{border-color:var(--danger)!important;background:rgba(255,69,96,0.08)!important;color:var(--danger);}
+    @keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
+    .num-inp.shake{animation:shake 0.35s ease;}
+    .err-msg{font-size:10px;color:var(--danger);margin-top:3px;font-weight:600;display:none;}
+    .err-msg.show{display:block;}
+    .indiv-pct{font-size:12px;color:var(--txt2);text-align:center;font-weight:500;transition:color 0.3s;}
+    .indiv-pct.filled{color:var(--txt);}
+
+    /* insight strip */
+    .insight{
+      padding:10px 16px;font-size:12px;font-weight:600;
+      border-top:1px solid var(--bd);display:flex;align-items:center;
+      gap:8px;flex-wrap:wrap;line-height:1.5;
+      animation:fadeUp 0.3s ease both;
+    }
+    .insight.safe{color:var(--safe);background:rgba(54,214,138,0.05);}
+    .insight.warn{color:var(--warn);background:rgba(245,158,11,0.05);}
+    .insight.dng{color:var(--danger);background:rgba(255,69,96,0.05);}
+    .insight-sep{color:var(--bd2);margin:0 2px;}
+    .insight-icon-wrap{flex-shrink:0;margin-top:1px;}
+    .insight-body{display:flex;flex-direction:column;gap:3px;}
+    .insight-title{font-size:13px;font-weight:700;}
+    .insight-sub{font-size:11px;font-weight:500;opacity:0.85;line-height:1.5;}
+
+    /* ── ACTIONS ── */
+    .bottom{display:flex;align-items:center;gap:10px;margin-top:18px;flex-wrap:wrap;}
+    .btn-add{
+      display:inline-flex;align-items:center;gap:7px;
+      background:rgba(91,82,255,0.15);border:1px solid rgba(91,82,255,0.3);
+      border-radius:100px;padding:10px 20px;font-size:13px;font-weight:600;
+      color:#a09bff;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;
+    }
+    .btn-add:hover{background:rgba(91,82,255,0.28);transform:translateY(-1px);}
+    .btn-clr{
+      display:inline-flex;align-items:center;gap:6px;background:transparent;
+      border:1px solid var(--bd2);border-radius:100px;padding:10px 20px;
+      font-size:13px;font-weight:500;color:var(--txt2);cursor:pointer;
+      font-family:'DM Sans',sans-serif;transition:all 0.2s;
+    }
+    .btn-clr:hover{border-color:var(--danger);color:var(--danger);}
+
+    .calc-hint{font-size:12px;color:var(--txt3);margin-top:10px;display:flex;align-items:center;gap:5px;animation:fadeUp 0.4s 0.5s ease both;}
+    .calc-hint.done{color:var(--safe);}
+
+    /* ── HOW IT WORKS ── */
+    .how{margin:40px 0 24px;}
+    .sec-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:16px;}
+    .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;}
+    .step{
+      background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:16px;
+      transition:border-color 0.2s,transform 0.2s;
+    }
+    .step:hover{border-color:var(--bd2);transform:translateY(-2px);}
+    .sn{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--acc);opacity:0.25;margin-bottom:6px;}
+    .st{font-size:13px;font-weight:600;margin-bottom:3px;}
+    .sd{font-size:12px;color:var(--txt2);line-height:1.55;}
+
+    .formula{
+      background:var(--s2);border:1px solid var(--bd);border-left:3px solid var(--acc);
+      border-radius:12px;padding:13px 16px;font-family:'Syne',sans-serif;
+      font-size:11px;color:#a09bff;margin-top:14px;line-height:1.9;
+    }
+    .formula span{color:var(--txt2);font-family:'DM Sans',sans-serif;}
+
+    /* ── INSTALL ── */
+    .install-sec{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);padding:22px;margin:26px 0;}
+    .install-list{display:flex;flex-direction:column;gap:12px;margin-top:14px;}
+    .i-step{display:flex;gap:12px;align-items:flex-start;}
+    .i-num{
+      width:26px;height:26px;border-radius:50%;
+      background:rgba(91,82,255,0.18);border:1px solid rgba(91,82,255,0.35);
+      display:flex;align-items:center;justify-content:center;
+      font-size:11px;font-weight:700;color:#a09bff;flex-shrink:0;margin-top:1px;
+    }
+    .i-title{font-size:13px;font-weight:600;margin-bottom:2px;}
+    .i-desc{font-size:12px;color:var(--txt2);line-height:1.55;}
+    code{background:var(--s3);border:1px solid var(--bd2);border-radius:5px;padding:1px 6px;font-size:11px;color:#a09bff;font-family:monospace;}
+
+    /* ── FOOTER ── */
+    footer{text-align:center;padding:32px 0 14px;color:var(--txt3);font-size:12px;line-height:1.8;}
+    .foot-links{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px;}
+    .foot-link{
+      display:inline-flex;align-items:center;gap:6px;color:var(--txt2);
+      text-decoration:none;font-size:12px;border:1px solid var(--bd);
+      border-radius:100px;padding:6px 14px;transition:all 0.2s;
+    }
+    .foot-link:hover{color:#e2e6f3;border-color:var(--bd2);transform:translateY(-1px);}
+    .foot-link.li:hover{color:#0a66c2;border-color:#0a66c2;}
+
+    /* ── TOAST ── */
+    .toast{
+      position:fixed;bottom:24px;left:50%;
+      transform:translateX(-50%) translateY(80px);
+      background:#1b2030;border:1px solid var(--acc);border-radius:100px;
+      padding:9px 22px;font-size:13px;color:var(--txt);
+      transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+      z-index:1000;white-space:nowrap;pointer-events:none;
+    }
+    .toast.show{transform:translateX(-50%) translateY(0);}
+
+    @media(max-width:480px){
+      .controls{flex-direction:column;align-items:flex-start;}
+      .btn-calculate{width:100%;justify-content:center;}
+      .comp-row{grid-template-columns:80px 1fr 1fr 40px;}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ANIMATED BACKGROUND -->
+  <canvas id="bgCanvas"></canvas>
+
+  <div class="wrap">
+
+    <nav>
+      <div class="logo">KL Attendance</div>
+      <a href="#install" class="nav-ext">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+          <rect x="1" y="1" width="12" height="12" rx="3" stroke="currentColor" stroke-width="1.2"/>
+          <path d="M4 7h6M7 4v6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+        Get Extension
+      </a>
+    </nav>
+
+    <div class="hero">
+      <div class="hero-badge">
+        <div class="dot-pulse"></div>
+        KL University
+      </div>
+      <h1>Attendance<br>Calculator</h1>
+      <p class="hero-sub">Know exactly where you stand — how many classes you can bunk or need to attend.</p>
+      <div class="marquee-wrap">
+        <div class="marquee-track">
+          <span class="marquee-dot"></span>
+          <span class="marquee-text">Attendance is calculated on days not on percentage</span>
+          <span class="marquee-dot"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOP AD -->
+    <div class="ad-wrap">
+      <span class="ad-lbl">Advertisement</span>
+      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3123300227513455" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+    <!-- CONTROLS -->
+    <div class="controls">
+      <div class="target-wrap">
+        <span class="target-lbl">Target:</span>
+        <div class="target-btns" id="tbtns">
+          <button class="tbtn on" onclick="setTarget(75,this)">75%</button>
+          <button class="tbtn" onclick="setTarget(80,this)">80%</button>
+          <button class="tbtn" onclick="setTarget(85,this)">85%</button>
+        </div>
+      </div>
+      <button class="btn-calculate" onclick="calculateAll()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <rect x="1" y="1" width="12" height="12" rx="2.5" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M3.5 4.5h4M3.5 7h5M3.5 9.5h3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          <circle cx="10.5" cy="3.5" r="1.2" fill="currentColor"/>
+        </svg>
+        Calculate Attendance
+      </button>
+    </div>
+
+    <!-- CARDS -->
+    <div class="cards" id="cardsEl"></div>
+
+    <!-- BOTTOM ACTIONS -->
+    <div class="bottom">
+      <button class="btn-add" onclick="addSub()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Add Subject
+      </button>
+      <button class="btn-clr" onclick="clearAll()">Clear All</button>
+    </div>
+    <div class="calc-hint" id="calcHint">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1"/>
+        <path d="M6 4v3M6 8.2v.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      Fill in attended &amp; conducted classes, then press Calculate
+    </div>
+
+    <!-- MID AD -->
+    <div class="ad-wrap" style="margin-top:30px;">
+      <span class="ad-lbl">Advertisement</span>
+      <ins class="adsbygoogle" style="display:block;width:100%;min-height:250px;" data-ad-client="ca-pub-3123300227513455" data-ad-slot="auto" data-ad-format="rectangle" data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <div class="how">
+      <div class="sec-title">How it works</div>
+      <div class="steps">
+        <div class="step"><div class="sn">01</div><div class="st">Add subjects</div><div class="sd">One card per subject. Rename each to your actual subject.</div></div>
+        <div class="step"><div class="sn">02</div><div class="st">Fill classes</div><div class="sd">Enter attended &amp; conducted for each component. Leave blank to skip.</div></div>
+        <div class="step"><div class="sn">03</div><div class="st">Set target</div><div class="sd">Pick 75%, 80% or 85% — bunk &amp; requirement count updates instantly.</div></div>
+        <div class="step"><div class="sn">04</div><div class="st">Calculate</div><div class="sd">Press Calculate to see results, bunk allowance or classes needed.</div></div>
+      </div>
+      <div class="formula">
+        % = [(La×100)+(Pa×50)+(Ta×25)+(Sa×25)] ÷ [(Lt×100)+(Pt×50)+(Tt×25)+(St×25)] × 100
+        <br><span>Empty fields excluded · Same formula as KL ERP · a = attended, t = conducted</span>
+      </div>
+    </div>
+
+    <!-- INSTALL -->
+    <div class="install-sec" id="install">
+      <div class="sec-title">Install Chrome Extension</div>
+      <p style="font-size:12px;color:var(--txt2);margin-bottom:2px;">Reads your ERP attendance page and fills all subjects automatically — no passwords stored.</p>
+      <div class="install-list">
+        <div class="i-step"><div class="i-num">1</div><div><div class="i-title">Download the extension</div><div class="i-desc">Download <code>kl-attendance-extension.zip</code> and unzip it.</div></div></div>
+        <div class="i-step"><div class="i-num">2</div><div><div class="i-title">Open Chrome Extensions</div><div class="i-desc">Type <code>chrome://extensions</code> in your address bar.</div></div></div>
+        <div class="i-step"><div class="i-num">3</div><div><div class="i-title">Enable Developer Mode</div><div class="i-desc">Toggle "Developer mode" on — top right corner.</div></div></div>
+        <div class="i-step"><div class="i-num">4</div><div><div class="i-title">Load the extension</div><div class="i-desc">Click "Load unpacked" → select the unzipped <code>extension</code> folder.</div></div></div>
+        <div class="i-step"><div class="i-num">5</div><div><div class="i-title">Sync from ERP</div><div class="i-desc">Log into <code>newerp.kluniversity.in</code> → attendance page → click extension icon → press <strong>Send to Calculator</strong>.</div></div></div>
+      </div>
+    </div>
+
+    <!-- BOTTOM AD -->
+    <div class="ad-wrap">
+      <span class="ad-lbl">Advertisement</span>
+      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3123300227513455" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+    <footer>
+      Built for KL University students · Same formula as your ERP<br>
+      &copy; 2025 KL Attendance Calculator · Free to use
+      <div class="foot-links">
+        <a href="https://github.com/uv-xii" target="_blank" rel="noopener" class="foot-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          uv-xii
+        </a>
+        <a href="https://www.linkedin.com/in/yuvraj-singh-8292aa373" target="_blank" rel="noopener" class="foot-link li">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          Yuvraj Singh
+        </a>
+      </div>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    /* ═══════════════════════════════════════════
+       ANIMATED BACKGROUND — floating orbs + grid
+    ═══════════════════════════════════════════ */
+    (function(){
+      const canvas = document.getElementById('bgCanvas');
+      const ctx = canvas.getContext('2d');
+      let W, H, orbs=[], particles=[];
+      const COLORS = ['91,82,255','255,92,125','54,214,138','245,158,11'];
+
+      function resize(){
+        W = canvas.width  = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+      }
+
+      class Orb {
+        constructor(){this.reset(true);}
+        reset(init){
+          this.x   = Math.random()*W;
+          this.y   = init ? Math.random()*H : (Math.random()>0.5 ? -200 : H+200);
+          this.r   = 120 + Math.random()*220;
+          this.col = COLORS[Math.floor(Math.random()*COLORS.length)];
+          this.vx  = (Math.random()-0.5)*0.3;
+          this.vy  = (Math.random()-0.5)*0.3;
+          this.alpha = 0.04 + Math.random()*0.07;
+          this.pulse = Math.random()*Math.PI*2;
+          this.pulseSpeed = 0.005+Math.random()*0.008;
+        }
+        update(){
+          this.x += this.vx; this.y += this.vy;
+          this.pulse += this.pulseSpeed;
+          if(this.x<-300||this.x>W+300||this.y<-300||this.y>H+300) this.reset(false);
+        }
+        draw(){
+          const pr = this.r*(1+0.08*Math.sin(this.pulse));
+          const g = ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,pr);
+          g.addColorStop(0,`rgba(${this.col},${this.alpha})`);
+          g.addColorStop(1,`rgba(${this.col},0)`);
+          ctx.beginPath();
+          ctx.arc(this.x,this.y,pr,0,Math.PI*2);
+          ctx.fillStyle=g; ctx.fill();
+        }
+      }
+
+      class Particle {
+        constructor(){this.reset();}
+        reset(){
+          this.x=Math.random()*W; this.y=Math.random()*H;
+          this.size=0.5+Math.random()*1.5;
+          this.col=COLORS[Math.floor(Math.random()*COLORS.length)];
+          this.alpha=0.1+Math.random()*0.4;
+          this.vx=(Math.random()-0.5)*0.4;
+          this.vy=-0.2-Math.random()*0.5;
+          this.life=0; this.maxLife=200+Math.random()*300;
+        }
+        update(){
+          this.x+=this.vx; this.y+=this.vy; this.life++;
+          if(this.life>this.maxLife||this.y<-10) this.reset();
+        }
+        draw(){
+          const a=this.alpha*(1-this.life/this.maxLife);
+          ctx.beginPath();
+          ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+          ctx.fillStyle=`rgba(${this.col},${a})`; ctx.fill();
+        }
+      }
+
+      function drawGrid(){
+        const sz=40;
+        ctx.strokeStyle='rgba(91,82,255,0.025)';
+        ctx.lineWidth=1;
+        for(let x=0;x<W;x+=sz){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+        for(let y=0;y<H;y+=sz){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+      }
+
+      function init(){
+        resize();
+        orbs=[]; particles=[];
+        for(let i=0;i<6;i++) orbs.push(new Orb());
+        for(let i=0;i<60;i++) particles.push(new Particle());
+      }
+
+      function loop(){
+        ctx.clearRect(0,0,W,H);
+        drawGrid();
+        orbs.forEach(o=>{o.update();o.draw();});
+        particles.forEach(p=>{p.update();p.draw();});
+        requestAnimationFrame(loop);
+      }
+
+      window.addEventListener('resize',()=>{resize();});
+      init(); loop();
+    })();
+
+    /* ═══════════════════════════════════════════
+       CALCULATOR LOGIC
+    ═══════════════════════════════════════════ */
+    const W2={L:100,P:50,T:25,S:25};
+    const COMPS=[
+      {k:'L',label:'Lecture',  col:'#5b52ff'},
+      {k:'P',label:'Practical',col:'#ff5c7d'},
+      {k:'T',label:'Tutorial', col:'#f59e0b'},
+      {k:'S',label:'Skill',    col:'#36d68a'},
+    ];
+
+    let subs=[], uid=0, target=75, calculated=false;
+
+    function mk(d){
+      const id=++uid;
+      const base={id,name:d?.name??'Subject '+id,La:'',Lt:'',Pa:'',Pt:'',Ta:'',Tt:'',Sa:'',St:'',fromERP:false};
+      if(d){
+        if(d.L){base.La=d.L[0]||'';base.Lt=d.L[1]||'';}
+        if(d.P){base.Pa=d.P[0]||'';base.Pt=d.P[1]||'';}
+        if(d.T){base.Ta=d.T[0]||'';base.Tt=d.T[1]||'';}
+        if(d.S){base.Sa=d.S[0]||'';base.St=d.S[1]||'';}
+      }
+      return base;
+    }
+
+    function n(x){return parseFloat(x)||0;}
+
+    function calcSub(s){
+      let wa=0,wt=0;
+      if(n(s.La)&&n(s.Lt)){wa+=n(s.La)*W2.L;wt+=n(s.Lt)*W2.L;}
+      if(n(s.Pa)&&n(s.Pt)){wa+=n(s.Pa)*W2.P;wt+=n(s.Pt)*W2.P;}
+      if(n(s.Ta)&&n(s.Tt)){wa+=n(s.Ta)*W2.T;wt+=n(s.Tt)*W2.T;}
+      if(n(s.Sa)&&n(s.St)){wa+=n(s.Sa)*W2.S;wt+=n(s.St)*W2.S;}
+      return wt===0?null:Math.round(wa/wt*10000)/100;
+    }
+
+    function toReach(s,tgt){
+      let wa=0,wt=0;
+      if(n(s.La)&&n(s.Lt)){wa+=n(s.La)*W2.L;wt+=n(s.Lt)*W2.L;}
+      if(n(s.Pa)&&n(s.Pt)){wa+=n(s.Pa)*W2.P;wt+=n(s.Pt)*W2.P;}
+      if(n(s.Ta)&&n(s.Tt)){wa+=n(s.Ta)*W2.T;wt+=n(s.Tt)*W2.T;}
+      if(n(s.Sa)&&n(s.St)){wa+=n(s.Sa)*W2.S;wt+=n(s.St)*W2.S;}
+      if(wt===0) return null;
+      let count=0;
+      while((wa/wt)*100<tgt&&count<500){wa+=W2.L;wt+=W2.L;count++;}
+      return count;
+    }
+
+    function canBunk(s,tgt){
+      let wa=0,wt=0;
+      if(n(s.La)&&n(s.Lt)){wa+=n(s.La)*W2.L;wt+=n(s.Lt)*W2.L;}
+      if(n(s.Pa)&&n(s.Pt)){wa+=n(s.Pa)*W2.P;wt+=n(s.Pt)*W2.P;}
+      if(n(s.Ta)&&n(s.Tt)){wa+=n(s.Ta)*W2.T;wt+=n(s.Tt)*W2.T;}
+      if(n(s.Sa)&&n(s.St)){wa+=n(s.Sa)*W2.S;wt+=n(s.St)*W2.S;}
+      if(wt===0) return 0;
+      let count=0;
+      while((wa/(wt+W2.L))*100>=tgt&&count<500){wt+=W2.L;count++;}
+      return count;
+    }
+
+    // Returns how many of each component needed to reach target
+    function toReachPerComp(s, tgt){
+      let wa=0, wt=0;
+      if(n(s.La)&&n(s.Lt)){wa+=n(s.La)*W2.L;wt+=n(s.Lt)*W2.L;}
+      if(n(s.Pa)&&n(s.Pt)){wa+=n(s.Pa)*W2.P;wt+=n(s.Pt)*W2.P;}
+      if(n(s.Ta)&&n(s.Tt)){wa+=n(s.Ta)*W2.T;wt+=n(s.Tt)*W2.T;}
+      if(n(s.Sa)&&n(s.St)){wa+=n(s.Sa)*W2.S;wt+=n(s.St)*W2.S;}
+      if(wt===0) return [];
+      const compsActive=[
+        {label:'Lecture',   w:W2.L, active:n(s.La)&&n(s.Lt)},
+        {label:'Practical', w:W2.P, active:n(s.Pa)&&n(s.Pt)},
+        {label:'Tutorial',  w:W2.T, active:n(s.Ta)&&n(s.Tt)},
+        {label:'Skill',     w:W2.S, active:n(s.Sa)&&n(s.St)},
+      ].filter(c=>c.active);
+      // Calculate per component assuming only that component's classes are attended
+      return compsActive.map(c=>{
+        let twa=wa, twt=wt, count=0;
+        while((twa/twt)*100<tgt && count<500){twa+=c.w;twt+=c.w;count++;}
+        return {label:c.label, count};
+      });
+    }
+
+    // Returns per-component bunk breakdown as an array of {label, count}
+    function canBunkPerComp(s, tgt){
+      // Get total weighted attended and total first
+      let wa=0, wt=0;
+      if(n(s.La)&&n(s.Lt)){wa+=n(s.La)*W2.L;wt+=n(s.Lt)*W2.L;}
+      if(n(s.Pa)&&n(s.Pt)){wa+=n(s.Pa)*W2.P;wt+=n(s.Pt)*W2.P;}
+      if(n(s.Ta)&&n(s.Tt)){wa+=n(s.Ta)*W2.T;wt+=n(s.Tt)*W2.T;}
+      if(n(s.Sa)&&n(s.St)){wa+=n(s.Sa)*W2.S;wt+=n(s.St)*W2.S;}
+      if(wt===0) return [];
+
+      const compsActive=[
+        {label:'Lecture',   w:W2.L, active:n(s.La)&&n(s.Lt)},
+        {label:'Practical', w:W2.P, active:n(s.Pa)&&n(s.Pt)},
+        {label:'Tutorial',  w:W2.T, active:n(s.Ta)&&n(s.Tt)},
+        {label:'Skill',     w:W2.S, active:n(s.Sa)&&n(s.St)},
+      ].filter(c=>c.active);
+
+      return compsActive.map(c=>{
+        let twt=wt, count=0;
+        // Bunk classes of this component type only
+        while(((wa)/(twt+c.w))*100>=tgt && count<200){twt+=c.w;count++;}
+        return {label:c.label, count};
+      }).filter(c=>c.count>0);
+    }
+
+    function cls(p){return p===null?'none':p>=75?'safe':p>=65?'warn':'dng';}
+
+    function indivPct(a,t){
+      const av=n(a),tv=n(t);
+      if(!av||!tv) return null;
+      return Math.round(av/tv*100)+'%';
+    }
+
+    function cardHTML(s,delay){
+      const p   = calculated?calcSub(s):null;
+      const c   = cls(p);
+      const pw  = p?Math.min(p,100):0;
+      const bdc = calculated&&c!=='none'?(c==='safe'?'safe-bd':c==='warn'?'warn-bd':'dng-bd'):'';
+
+      const rows=COMPS.map(cp=>{
+        const av=s[cp.k+'a'],tv=s[cp.k+'t'];
+        const ip=calculated?indivPct(av,tv):null;
+        return `
+        <div class="comp-row">
+          <div class="comp-name">
+            <div class="cdot" style="background:${cp.col};box-shadow:0 0 6px ${cp.col}66"></div>
+            <span style="color:${cp.col}">${cp.label}</span>
+          </div>
+          <div class="inp-grp">
+            <div class="inp-lbl">Attended</div>
+            <input class="num-inp" type="number" min="0" placeholder="e.g. 18"
+              id="inp-${s.id}-${cp.k}a"
+              value="${av}" onchange="upV(${s.id},'${cp.k}a',this.value)">
+          </div>
+          <div class="inp-grp">
+            <div class="inp-lbl">Conducted</div>
+            <input class="num-inp" type="number" min="0" placeholder="e.g. 20"
+              id="inp-${s.id}-${cp.k}t"
+              value="${tv}" onchange="upV(${s.id},'${cp.k}t',this.value)">
+          </div>
+          <div class="indiv-pct${ip?' filled':''}">${ip||'—'}</div>
+        </div>`;
+      }).join('');
+
+      let insight='';
+      if(calculated&&p!==null){
+        const b=canBunk(s,target);
+        const r=toReach(s,target);
+
+        if(p>85){
+          // 🟢 ABOVE 85% — Excellent
+          insight=`<div class="insight safe">
+            <div class="insight-icon-wrap">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 8l2.5 2.5 4.5-4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="insight-body">
+              <div class="insight-title">Excellent! You're at ${p}% 🎉</div>
+              <div class="insight-sub">${(()=>{
+              const bp=canBunkPerComp(s,target);
+              if(bp.length===0) return 'You are well above the limit — keep it up!';
+              const best=bp.reduce((a,c)=>c.count>a.count?c:a,bp[0]);
+              return 'You can bunk '+b+' more class'+(b>1?'es':'')+' total — most room in '+best.label+' ('+best.count+' class'+(best.count>1?'es':'')+')';
+            })()}</div>
+            </div>
+          </div>`;
+        } else if(p>=75){
+          // 🟡 BETWEEN 75–85% — Safe but tight
+          insight=`<div class="insight safe">
+            <div class="insight-icon-wrap">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 8l2.5 2.5 4.5-4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="insight-body">
+              <div class="insight-title">Safe at ${p}% — but don't get too comfortable</div>
+              <div class="insight-sub">${(()=>{
+              const bp=canBunkPerComp(s,target);
+              if(bp.length===0) return 'You are right at the edge — attend every class to avoid dropping below '+target+'%';
+              const best=bp.reduce((a,c)=>c.count>a.count?c:a,bp[0]);
+              return 'You can bunk '+b+' more class'+(b>1?'es':'')+' total — most room in '+best.label+' ('+best.count+' class'+(best.count>1?'es':'')+') — attend regularly to stay safe';
+            })()}</div>
+            </div>
+          </div>`;
+        } else if(p>=65){
+          // 🟠 BETWEEN 65–75% — Borderline
+          insight=`<div class="insight warn">
+            <div class="insight-icon-wrap">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2L1.5 13h13L8 2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 7v3M8 11.5v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            </div>
+            <div class="insight-body">
+              <div class="insight-title">Borderline! You're at ${p}% ⚠️</div>
+              <div class="insight-sub">${(()=>{
+              const rp=toReachPerComp(s,target);
+              if(!rp.length) return 'Attend all upcoming classes to recover your attendance.';
+              const easiest=rp.reduce((a,c)=>c.count<a.count?c:a,rp[0]);
+              return 'Need '+r+' more class'+(r>1?'es':'')+' to reach '+target+'% — quickest via '+easiest.label+' (attend '+easiest.count+' consecutively)';
+            })()}</div>
+            </div>
+          </div>`;
+        } else {
+          // 🔴 BELOW 65% — Shortage / Danger
+          insight=`<div class="insight dng">
+            <div class="insight-icon-wrap">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v4M8 11v.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </div>
+            <div class="insight-body">
+              <div class="insight-title">Danger! Attendance shortage at ${p}% 🚨</div>
+              <div class="insight-sub">${(()=>{
+              const rp=toReachPerComp(s,target);
+              if(!rp.length) return 'Attend every single class and consult your faculty immediately.';
+              const easiest=rp.reduce((a,c)=>c.count<a.count?c:a,rp[0]);
+              return 'Need '+r+' more class'+(r>1?'es':'')+' to reach '+target+'% — least effort via '+easiest.label+' ('+easiest.count+' consecutive class'+(easiest.count>1?'es':'')+') — consult your faculty now!';
+            })()}</div>
+            </div>
+          </div>`;
+        }
+      }
+
+      const erpTag=s.fromERP?`<div style="display:inline-flex;align-items:center;gap:4px;background:rgba(91,82,255,0.15);border-radius:100px;padding:2px 9px;font-size:10px;color:#a09bff;font-weight:600;">⚡ ERP</div>`:'';
+      const res=calculated
+        ?`<div class="pill ${c}">${p!==null?p+'%':'—'}</div>`
+        :`<div class="pill none">—</div>`;
+
+      return `
+      <div class="card ${bdc}" id="card-${s.id}" style="animation-delay:${delay}ms">
+        <div class="card-hd">
+          <div class="card-hd-l">
+            <input class="sub-inp" type="text" value="${s.name}" placeholder="Subject name"
+              onchange="upN(${s.id},this.value)">
+            ${erpTag}
+          </div>
+          <div class="card-hd-r">${res}<button class="rm-btn" onclick="rmSub(${s.id})">✕</button></div>
+        </div>
+        <div class="prog"><div class="prog-fill ${c}" style="width:${pw}%"></div></div>
+        <div class="comps">${rows}</div>
+        ${insight}
+      </div>`;
+    }
+
+    function render(){
+      document.getElementById('cardsEl').innerHTML=
+        subs.map((s,i)=>cardHTML(s,i*60)).join('');
+    }
+
+    function setTarget(t,btn){
+      target=t;
+      document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('on'));
+      btn.classList.add('on');
+      if(calculated) render();
+    }
+
+    function shakeInp(el){
+      if(!el)return;
+      el.classList.add('err');
+      el.classList.remove('shake');
+      void el.offsetWidth;
+      el.classList.add('shake');
+      setTimeout(()=>el.classList.remove('shake'),400);
+    }
+
+    function clearErrors(){
+      document.querySelectorAll('.num-inp.err').forEach(el=>el.classList.remove('err','shake'));
+    }
+
+    function calculateAll(){
+      if(!subs.length){toast('Add at least one subject first.');return;}
+      const hasAny=subs.some(s=>
+        (n(s.La)&&n(s.Lt))||(n(s.Pa)&&n(s.Pt))||
+        (n(s.Ta)&&n(s.Tt))||(n(s.Sa)&&n(s.St))
+      );
+      if(!hasAny){toast('Fill in some values first.');return;}
+
+      // Validate: attended must not exceed conducted for any component
+      let hasError=false;
+      subs.forEach(s=>{
+        ['L','P','T','S'].forEach(k=>{
+          const av=n(s[k+'a']), tv=n(s[k+'t']);
+          if(av>0 && tv>0 && av>tv){
+            hasError=true;
+            // Shake the attended input for this component
+            const aInp=document.getElementById('inp-'+s.id+'-'+k+'a');
+            const tInp=document.getElementById('inp-'+s.id+'-'+k+'t');
+            shakeInp(aInp);
+            if(tInp) tInp.classList.add('err');
+          }
+        });
+      });
+
+      if(hasError){
+        toast('⚠ Attended classes cannot exceed conducted — fix the red fields first!');
+        return;
+      }
+
+      clearErrors();
+      calculated=true;
+      render();
+      setHint(true);
+      toast('✓ Attendance calculated!');
+    }
+
+    function setHint(done){
+      const el=document.getElementById('calcHint');
+      if(done){
+        el.className='calc-hint done';
+        el.innerHTML=`<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1"/><path d="M3.5 6l2 2 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Done! Change any value and press Calculate again to update.`;
+      } else {
+        el.className='calc-hint';
+        el.innerHTML=`<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1"/><path d="M6 4v3M6 8.2v.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Fill in attended &amp; conducted classes, then press Calculate`;
+      }
+    }
+
+    function addSub(){
+      subs.push(mk());
+      if(calculated){calculated=false;setHint(false);}
+      render();
+      setTimeout(()=>{
+        const cards=document.querySelectorAll('.card');
+        cards[cards.length-1]?.scrollIntoView({behavior:'smooth',block:'center'});
+      },80);
+    }
+
+    function rmSub(id){
+      subs=subs.filter(s=>s.id!==id);
+      calculated=false;setHint(false);render();
+    }
+
+    function upN(id,v){const s=subs.find(s=>s.id===id);if(s)s.name=v;}
+
+    function upV(id,k,v){
+      const s=subs.find(s=>s.id===id);if(!s)return;
+      s[k]=Math.max(0,parseFloat(v)||0)||'';
+      if(calculated){calculated=false;setHint(false);render();}
+    }
+
+    function clearAll(){
+      if(!confirm('Clear all subjects?'))return;
+      subs=[];uid=0;calculated=false;render();setHint(false);
+    }
+
+    function toast(msg){
+      const t=document.getElementById('toast');
+      t.textContent=msg;t.classList.add('show');
+      setTimeout(()=>t.classList.remove('show'),3000);
+    }
+
+    // Section title underline animation on scroll
+    const secObserver=new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting) e.target.classList.add('visible');
+      });
+    },{threshold:0.5});
+    document.querySelectorAll('.sec-title').forEach(el=>secObserver.observe(el));
+
+    // ERP extension listener
+    window.addEventListener('message',function(e){
+      if(!e.data||e.data.type!=='KL_ATTENDANCE_DATA')return;
+      const data=e.data.subjects;
+      if(!Array.isArray(data)||!data.length)return;
+      subs=subs.filter(s=>!s.fromERP);
+      data.forEach(d=>{const s=mk(d);s.fromERP=true;subs.unshift(s);});
+      calculated=true;render();setHint(true);
+      toast('⚡ '+data.length+' subjects synced from ERP!');
+    });
+
+    // ── Start with 2 blank subjects ──
+    subs.push(mk());
+    subs.push(mk());
+    render();
+  </script>
+</body>
+</html>
