@@ -6,7 +6,9 @@
   <title>KL Attendance Calculator</title>
   <meta name="description" content="KL University attendance calculator with bunk counter and target tracker."/>
 
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3123300227513455" crossorigin="anonymous"></script>
+  <!-- EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>emailjs.init("sZaWgU-npxQQKfbT8");</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
@@ -20,6 +22,24 @@
       --safe:#36d68a; --warn:#f59e0b; --danger:#ff4560;
       --r:14px;
     }
+    body.light{
+      --bg:#f4f6fb; --s1:#ffffff; --s2:#f0f2f8; --s3:#e8ebf4;
+      --bd:#d8dce8; --bd2:#c4c9db;
+      --txt:#1a1d2e; --txt2:#5a607a; --txt3:#9aa0b8;
+    }
+    body.light #bgCanvas{opacity:0.3;}
+
+    /* ── THEME TOGGLE ── */
+    .theme-toggle{
+      display:inline-flex;align-items:center;gap:7px;
+      background:var(--s2);border:1px solid var(--bd);
+      border-radius:100px;padding:5px 12px;cursor:pointer;
+      font-size:12px;font-weight:500;color:var(--txt2);
+      transition:all 0.2s;user-select:none;
+    }
+    .theme-toggle:hover{border-color:var(--bd2);color:var(--txt);}
+    .toggle-icon{font-size:14px;transition:transform 0.4s ease;}
+    body.light .toggle-icon{transform:rotate(180deg);}
     *{box-sizing:border-box;margin:0;padding:0;}
     html{scroll-behavior:smooth;}
     body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;}
@@ -108,10 +128,6 @@
     }
     .sec-title.visible::after{width:100%;}
     @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
-
-    /* ── AD ── */
-    .ad-wrap{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);padding:8px;margin:18px 0;text-align:center;}
-    .ad-lbl{font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:0.1em;display:block;margin-bottom:4px;}
 
     /* ── CONTROLS BAR ── */
     .controls{
@@ -206,14 +222,14 @@
     }
     .comp-row:last-child{border-bottom:none;}
     .comp-row:hover{background:rgba(255,255,255,0.015);}
-    .comp-name{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;}
+    .comp-name{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;}
     .cdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;transition:box-shadow 0.3s;}
     .inp-grp{display:flex;flex-direction:column;gap:2px;padding:0 8px;}
-    .inp-lbl{font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;}
+    .inp-lbl{font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;}
     .num-inp{
       background:var(--s2);border:1px solid var(--bd);border-radius:8px;
       padding:7px 8px;color:var(--txt);font-family:'DM Sans',sans-serif;
-      font-size:14px;font-weight:600;width:100%;outline:none;
+      font-size:16px;font-weight:600;width:100%;outline:none;
       transition:border-color 0.2s,background 0.2s,transform 0.1s;
     }
     .num-inp:focus{border-color:var(--acc);background:var(--s3);transform:scale(1.02);}
@@ -224,7 +240,7 @@
     .num-inp.shake{animation:shake 0.35s ease;}
     .err-msg{font-size:10px;color:var(--danger);margin-top:3px;font-weight:600;display:none;}
     .err-msg.show{display:block;}
-    .indiv-pct{font-size:12px;color:var(--txt2);text-align:center;font-weight:500;transition:color 0.3s;}
+    .indiv-pct{font-size:14px;color:var(--txt2);text-align:center;font-weight:500;transition:color 0.3s;}
     .indiv-pct.filled{color:var(--txt);}
 
     /* insight strip */
@@ -297,6 +313,112 @@
     .i-desc{font-size:12px;color:var(--txt2);line-height:1.55;}
     code{background:var(--s3);border:1px solid var(--bd2);border-radius:5px;padding:1px 6px;font-size:11px;color:#a09bff;font-family:monospace;}
 
+    /* ── FEEDBACK ── */
+    .feedback-sec{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);padding:24px;margin:28px 0;}
+    .feedback-form{}
+    .fb-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    @media(max-width:480px){.fb-row{grid-template-columns:1fr;}}
+    .fb-grp{display:flex;flex-direction:column;gap:5px;}
+    .fb-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--txt3);}
+    .fb-inp{
+      background:var(--s2);border:1px solid var(--bd);border-radius:10px;
+      padding:10px 14px;color:var(--txt);font-family:'DM Sans',sans-serif;
+      font-size:14px;outline:none;transition:border-color 0.2s;
+      width:100%;
+    }
+    .fb-inp:focus{border-color:var(--acc);}
+    .fb-inp::placeholder{color:var(--txt3);}
+    .fb-ta{resize:vertical;min-height:100px;line-height:1.6;}
+    .btn-fb{
+      display:inline-flex;align-items:center;gap:7px;
+      background:var(--acc);color:#fff;border:none;border-radius:100px;
+      padding:10px 22px;font-size:13px;font-weight:600;cursor:pointer;
+      font-family:'DM Sans',sans-serif;transition:all 0.2s;
+    }
+    .btn-fb:hover{background:#7068ff;transform:translateY(-1px);}
+    .fb-success{
+      display:none;align-items:center;gap:6px;
+      color:var(--safe);font-size:13px;font-weight:600;
+    }
+    .fb-success.show{display:inline-flex;}
+
+    /* ── MODAL ── */
+    .modal-overlay{
+      position:fixed;inset:0;background:rgba(0,0,0,0.7);
+      z-index:2000;display:flex;align-items:center;justify-content:center;
+      opacity:0;pointer-events:none;transition:opacity 0.25s ease;
+      backdrop-filter:blur(4px);
+    }
+    .modal-overlay.open{opacity:1;pointer-events:all;}
+    .modal-box{
+      background:var(--s1);border:1px solid var(--bd2);border-radius:20px;
+      padding:28px 24px;max-width:380px;width:90%;text-align:center;
+      transform:translateY(16px) scale(0.97);transition:transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box{transform:translateY(0) scale(1);}
+    .modal-icon{font-size:36px;margin-bottom:12px;}
+    .modal-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;margin-bottom:10px;color:var(--txt);}
+    .modal-body{font-size:13px;color:var(--txt2);line-height:1.7;margin-bottom:20px;}
+    .modal-btn{
+      background:var(--acc);color:#fff;border:none;border-radius:100px;
+      padding:10px 28px;font-size:13px;font-weight:600;cursor:pointer;
+      font-family:'DM Sans',sans-serif;transition:background 0.2s;
+    }
+    .modal-btn:hover{background:#7068ff;}
+
+    /* ── SHARE CARD ── */
+    .share-box{max-width:420px;}
+    .share-card{
+      background:linear-gradient(135deg,#0e111a,#1b1040);
+      border:1px solid rgba(91,82,255,0.4);border-radius:16px;
+      padding:24px 20px;margin-bottom:18px;text-align:left;
+      position:relative;overflow:hidden;
+    }
+    .share-card::before{
+      content:'';position:absolute;inset:0;
+      background:radial-gradient(ellipse 80% 60% at 80% 20%,rgba(91,82,255,0.2),transparent);
+      pointer-events:none;
+    }
+    .share-card-logo{
+      font-family:'Syne',sans-serif;font-size:13px;font-weight:800;
+      color:#a09bff;letter-spacing:0.06em;text-transform:uppercase;
+      margin-bottom:14px;
+    }
+    .share-card-tagline{
+      font-family:'Syne',sans-serif;font-size:20px;font-weight:800;
+      color:#fff;line-height:1.2;margin-bottom:14px;
+    }
+    .share-card-features{
+      display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;
+    }
+    .share-card-features span{
+      font-size:11px;font-weight:600;color:#a09bff;
+      background:rgba(91,82,255,0.15);border:1px solid rgba(91,82,255,0.25);
+      border-radius:100px;padding:3px 10px;
+    }
+    .share-card-url{
+      font-size:12px;font-weight:600;color:#36d68a;
+      letter-spacing:0.03em;
+    }
+
+    .share-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+    .share-btn-copy,.share-btn-wa,.share-btn-tw{
+      display:inline-flex;align-items:center;gap:6px;
+      border:none;border-radius:100px;padding:8px 16px;
+      font-size:12px;font-weight:600;cursor:pointer;
+      font-family:'DM Sans',sans-serif;transition:all 0.2s;
+    }
+    .share-btn-copy{background:var(--s2);border:1px solid var(--bd2);color:var(--txt2);}
+    .share-btn-copy:hover{border-color:var(--acc);color:var(--acc);}
+    .share-btn-wa{background:rgba(37,211,102,0.12);border:1px solid rgba(37,211,102,0.3);color:#25d366;}
+    .share-btn-wa:hover{background:rgba(37,211,102,0.22);}
+    .share-btn-tw{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:var(--txt);}
+    .share-btn-tw:hover{background:rgba(255,255,255,0.12);}
+
+    /* ── FOOTER SHARE BUTTON ── */
+    .foot-share-btn{width:36px;height:36px;border-radius:50%;padding:0;display:inline-flex;align-items:center;justify-content:center;background:rgba(91,82,255,0.15);border:1px solid rgba(91,82,255,0.3);color:#a09bff;cursor:pointer;transition:all 0.2s;}
+    .foot-share-btn:hover{background:rgba(91,82,255,0.22);transform:translateY(-1px);}
+
     /* ── FOOTER ── */
     footer{text-align:center;padding:32px 0 14px;color:var(--txt3);font-size:12px;line-height:1.8;}
     .foot-links{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px;}
@@ -335,14 +457,65 @@
 
     <nav>
       <div class="logo">KL Attendance</div>
-      <a href="#install" class="nav-ext">
-        <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
-          <rect x="1" y="1" width="12" height="12" rx="3" stroke="currentColor" stroke-width="1.2"/>
-          <path d="M4 7h6M7 4v6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-        </svg>
-        Get Extension
-      </a>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">
+          <span class="toggle-icon" id="themeIcon">🌙</span>
+          <span id="themeLabel">Light</span>
+        </button>
+        <button class="nav-ext" onclick="showExtNotice()">
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+            <rect x="1" y="1" width="12" height="12" rx="3" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M4 7h6M7 4v6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          Get Extension
+        </button>
+      </div>
     </nav>
+
+    <!-- EXTENSION NOTICE MODAL -->
+    <div class="modal-overlay" id="extModal" onclick="closeModal('extModal')">
+      <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-icon">🔌</div>
+        <div class="modal-title">Extension Coming Soon</div>
+        <div class="modal-body">The KL Attendance Chrome Extension is currently under development. It will auto-fill your attendance directly from the KL ERP — no typing needed.<br><br>Stay tuned! We'll notify you when it's ready.</div>
+        <button class="modal-btn" onclick="closeModal('extModal')">Got it!</button>
+      </div>
+    </div>
+
+    <!-- SHARE MODAL -->
+    <div class="modal-overlay" id="shareModal" onclick="closeModal('shareModal')">
+      <div class="modal-box share-box" onclick="event.stopPropagation()">
+        <div class="modal-title" style="margin-bottom:4px;">Share with friends</div>
+        <div style="font-size:12px;color:var(--txt2);margin-bottom:16px;">Help your classmates track their attendance!</div>
+
+        <!-- Photocard -->
+        <div class="share-card" id="shareCard">
+          <div class="share-card-logo">KL Attendance</div>
+          <div class="share-card-tagline">Know your attendance.<br>Know your bunks.</div>
+          <div class="share-card-features">
+            <span>✓ Bunk counter</span>
+            <span>✓ Target tracker</span>
+            <span>✓ ERP formula</span>
+          </div>
+          <div class="share-card-url">timetablekl.vercel.app/attendance</div>
+        </div>
+
+        <div class="share-actions">
+          <button class="share-btn-copy" onclick="copyLink()">
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><rect x="4" y="4" width="9" height="9" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M1 10V3a2 2 0 012-2h7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            Copy Link
+          </button>
+          <button class="share-btn-wa" onclick="shareWhatsApp()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.122 1.532 5.856L.057 23.882a.5.5 0 00.606.61l6.239-1.638A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.893a9.865 9.865 0 01-5.034-1.378l-.36-.214-3.733.98.997-3.645-.235-.374A9.863 9.863 0 012.107 12C2.107 6.528 6.528 2.107 12 2.107S21.893 6.528 21.893 12 17.472 21.893 12 21.893z"/></svg>
+            WhatsApp
+          </button>
+          <button class="share-btn-tw" onclick="shareTwitter()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            X / Twitter
+          </button>
+        </div>
+      </div>
+    </div>
 
     <div class="hero">
       <div class="hero-badge">
@@ -360,20 +533,12 @@
       </div>
     </div>
 
-    <!-- TOP AD -->
-    <div class="ad-wrap">
-      <span class="ad-lbl">Advertisement</span>
-      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3123300227513455" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
-      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-    </div>
-
     <!-- CONTROLS -->
     <div class="controls">
       <div class="target-wrap">
         <span class="target-lbl">Target:</span>
         <div class="target-btns" id="tbtns">
           <button class="tbtn on" onclick="setTarget(75,this)">75%</button>
-          <button class="tbtn" onclick="setTarget(80,this)">80%</button>
           <button class="tbtn" onclick="setTarget(85,this)">85%</button>
         </div>
       </div>
@@ -408,20 +573,13 @@
       Fill in attended &amp; conducted classes, then press Calculate
     </div>
 
-    <!-- MID AD -->
-    <div class="ad-wrap" style="margin-top:30px;">
-      <span class="ad-lbl">Advertisement</span>
-      <ins class="adsbygoogle" style="display:block;width:100%;min-height:250px;" data-ad-client="ca-pub-3123300227513455" data-ad-slot="auto" data-ad-format="rectangle" data-full-width-responsive="true"></ins>
-      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-    </div>
-
     <!-- HOW IT WORKS -->
     <div class="how">
       <div class="sec-title">How it works</div>
       <div class="steps">
         <div class="step"><div class="sn">01</div><div class="st">Add subjects</div><div class="sd">One card per subject. Rename each to your actual subject.</div></div>
         <div class="step"><div class="sn">02</div><div class="st">Fill classes</div><div class="sd">Enter attended &amp; conducted for each component. Leave blank to skip.</div></div>
-        <div class="step"><div class="sn">03</div><div class="st">Set target</div><div class="sd">Pick 75%, 80% or 85% — bunk &amp; requirement count updates instantly.</div></div>
+        <div class="step"><div class="sn">03</div><div class="st">Set target</div><div class="sd">Pick 75% or 85% — bunk allowance &amp; classes needed update accordingly.</div></div>
         <div class="step"><div class="sn">04</div><div class="st">Calculate</div><div class="sd">Press Calculate to see results, bunk allowance or classes needed.</div></div>
       </div>
       <div class="formula">
@@ -443,17 +601,54 @@
       </div>
     </div>
 
-    <!-- BOTTOM AD -->
-    <div class="ad-wrap">
-      <span class="ad-lbl">Advertisement</span>
-      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3123300227513455" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
-      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    <!-- FEEDBACK -->
+    <div class="feedback-sec" id="feedback">
+      <div class="sec-title">Feedback</div>
+      <p style="font-size:13px;color:var(--txt2);margin-bottom:16px;">Found a bug? Have a suggestion? We'd love to hear from you.</p>
+      <div class="feedback-form">
+        <div class="fb-row">
+          <div class="fb-grp">
+            <label class="fb-lbl">Your Name</label>
+            <input class="fb-inp" type="text" id="fbName" placeholder="e.g. Yuvraj">
+          </div>
+          <div class="fb-grp">
+            <label class="fb-lbl">Type</label>
+            <select class="fb-inp" id="fbType">
+              <option value="bug">🐛 Bug Report</option>
+              <option value="suggestion">💡 Suggestion</option>
+              <option value="other">💬 Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="fb-grp" style="margin-top:12px;">
+          <label class="fb-lbl">Message</label>
+          <textarea class="fb-inp fb-ta" id="fbMsg" placeholder="Tell us what's on your mind..." rows="4"></textarea>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap;">
+          <button class="btn-fb" onclick="submitFeedback()">
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M1 7l5 5 7-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Send Feedback
+          </button>
+          <div class="fb-success" id="fbSuccess">
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/><path d="M4 7l2.5 2.5 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Thanks! Feedback sent.
+          </div>
+        </div>
+      </div>
     </div>
 
     <footer>
       Built for KL University students · Same formula as your ERP<br>
       &copy; 2025 KL Attendance Calculator · Free to use
       <div class="foot-links">
+        <button class="foot-share-btn" onclick="document.getElementById('shareModal').classList.add('open')" title="Share this site">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+            <circle cx="13" cy="3" r="2" stroke="currentColor" stroke-width="1.3"/>
+            <circle cx="3" cy="8" r="2" stroke="currentColor" stroke-width="1.3"/>
+            <circle cx="13" cy="13" r="2" stroke="currentColor" stroke-width="1.3"/>
+            <path d="M5 7l6-3M5 9l6 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+        </button>
         <a href="https://github.com/uv-xii" target="_blank" rel="noopener" class="foot-link">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
           uv-xii
@@ -930,6 +1125,94 @@
     subs.push(mk());
     subs.push(mk());
     render();
+
+    // ── MODAL HELPERS ─────────────────────────────
+    function showExtNotice(){
+      document.getElementById('extModal').classList.add('open');
+    }
+    function closeModal(id){
+      document.getElementById(id).classList.remove('open');
+    }
+    // Close modals on Escape
+    document.addEventListener('keydown',e=>{
+      if(e.key==='Escape'){
+        document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));
+      }
+    });
+
+    // ── SHARE ──────────────────────────────────────
+    const SITE_URL = 'https://timetablekl.vercel.app/attendance';
+    const SITE_MSG = 'Check your KL University attendance instantly! Bunk counter, target tracker & ERP formula — all free.';
+
+    function copyLink(){
+      navigator.clipboard.writeText(SITE_URL).then(()=>{
+        toast('Link copied to clipboard!');
+      }).catch(()=>{
+        toast('Copy: ' + SITE_URL);
+      });
+    }
+
+    function shareWhatsApp(){
+      const text = encodeURIComponent(SITE_MSG + ' ' + SITE_URL);
+      window.open('https://wa.me/?text=' + text, '_blank');
+    }
+
+    function shareTwitter(){
+      const text = encodeURIComponent(SITE_MSG + ' ' + SITE_URL);
+      window.open('https://twitter.com/intent/tweet?text=' + text, '_blank');
+    }
+
+    // ── THEME TOGGLE ──────────────────────────────
+    function toggleTheme(){
+      const isLight = document.body.classList.toggle('light');
+      document.getElementById('themeIcon').textContent = isLight ? '☀️' : '🌙';
+      document.getElementById('themeLabel').textContent = isLight ? 'Dark' : 'Light';
+      localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    }
+    // Restore saved theme
+    if(localStorage.getItem('theme')==='light'){
+      document.body.classList.add('light');
+      document.getElementById('themeIcon').textContent='☀️';
+      document.getElementById('themeLabel').textContent='Dark';
+    }
+
+    // ── FEEDBACK ──────────────────────────────────
+    function submitFeedback(){
+      const name = document.getElementById('fbName').value.trim();
+      const type = document.getElementById('fbType').value;
+      const msg  = document.getElementById('fbMsg').value.trim();
+      const btn  = document.querySelector('.btn-fb');
+
+      if(!msg){ toast('Please write a message first.'); return; }
+
+      // Disable button while sending
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+
+      const templateParams = {
+        name:    name || 'Anonymous',
+        title:   type,
+        type:    type,
+        message: msg,
+        email:   'no-reply@klattendance.com',
+      };
+
+      emailjs.send('service_e1pandz', 'template_riy4u9h', templateParams)
+        .then(()=>{
+          document.getElementById('fbSuccess').classList.add('show');
+          document.getElementById('fbName').value = '';
+          document.getElementById('fbMsg').value = '';
+          btn.disabled = false;
+          btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M1 7l5 5 7-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Send Feedback';
+          setTimeout(()=>document.getElementById('fbSuccess').classList.remove('show'), 5000);
+        })
+        .catch((err)=>{
+          console.error('EmailJS error:', err);
+          toast('Failed to send. Please try again.');
+          btn.disabled = false;
+          btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M1 7l5 5 7-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Send Feedback';
+        });
+    }
   </script>
 </body>
 </html>
