@@ -446,12 +446,61 @@
       .btn-calculate{width:100%;justify-content:center;}
       .comp-row{grid-template-columns:80px 1fr 1fr 40px;}
     }
+
+    /* ── SMOKE OVERLAY ── */
+    #smokeCanvas{
+      position:fixed;inset:0;z-index:999;
+      pointer-events:none;opacity:0;
+      transition:opacity 0.5s ease;
+    }
+    #smokeCanvas.show{opacity:1;}
+
+    /* ── MOTIVATIONAL OVERLAY ── */
+    .motive-overlay{
+      position:fixed;inset:0;z-index:1000;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      pointer-events:none;opacity:0;
+      transition:opacity 0.4s ease;
+    }
+    .motive-overlay.show{opacity:1;pointer-events:all;}
+    .motive-msg{
+      font-family:'Syne',sans-serif;
+      font-size:clamp(18px,4vw,28px);font-weight:800;
+      text-align:center;line-height:1.4;
+      padding:28px 36px;border-radius:20px;
+      backdrop-filter:blur(12px);
+      max-width:500px;margin:0 20px;
+      cursor:pointer;
+      animation:msgPop 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    @keyframes msgPop{from{transform:scale(0.7);opacity:0;}to{transform:scale(1);opacity:1;}}
+    .motive-msg.awesome{
+      background:rgba(54,214,138,0.15);
+      border:2px solid rgba(54,214,138,0.4);
+      color:#36d68a;
+    }
+    .motive-msg.skull{
+      background:rgba(255,69,96,0.12);
+      border:2px solid rgba(255,69,96,0.35);
+      color:#ff4560;
+    }
+    .motive-tap{
+      font-size:12px;font-weight:500;
+      color:rgba(255,255,255,0.4);
+      margin-top:12px;
+      animation:fadeUp 0.4s 0.6s ease both;
+    }
   </style>
 </head>
 <body>
 
   <!-- ANIMATED BACKGROUND -->
   <canvas id="bgCanvas"></canvas>
+  <canvas id="smokeCanvas"></canvas>
+  <div class="motive-overlay" id="motiveOverlay" onclick="closeMotiveOverlay()">
+    <div class="motive-msg" id="motiveMsg"></div>
+    <div class="motive-tap">tap anywhere to dismiss</div>
+  </div>
 
   <div class="wrap">
 
@@ -1055,6 +1104,7 @@
       render();
       setHint(true);
       toast('✓ Attendance calculated!');
+      setTimeout(checkMotivation, 400);
     }
 
     function setHint(done){
@@ -1125,6 +1175,184 @@
     subs.push(mk());
     subs.push(mk());
     render();
+
+    /* ═══════════════════════════════════════════
+       SMOKE TEXT / SKULL CANVAS EFFECT
+    ═══════════════════════════════════════════ */
+    const smokeCanvas = document.getElementById('smokeCanvas');
+    const smokeCtx    = smokeCanvas.getContext('2d');
+    let smokeParticles = [], smokeAnim = null, smokeMode = null;
+
+    function resizeSmoke(){
+      smokeCanvas.width  = window.innerWidth;
+      smokeCanvas.height = window.innerHeight;
+    }
+    resizeSmoke();
+    window.addEventListener('resize', resizeSmoke);
+
+    class SmokeParticle {
+      constructor(x, y, col){
+        this.x  = x; this.y = y;
+        this.ox = x; this.oy = y;
+        this.vx = (Math.random()-0.5)*1.2;
+        this.vy = -0.4 - Math.random()*1.2;
+        this.alpha = 0.7 + Math.random()*0.3;
+        this.r    = 3 + Math.random()*5;
+        this.col  = col;
+        this.life = 0;
+        this.maxLife = 80 + Math.random()*60;
+      }
+      update(){
+        this.x  += this.vx + Math.sin(this.life*0.1)*0.4;
+        this.y  += this.vy;
+        this.vy *= 0.98;
+        this.r  *= 1.02;
+        this.life++;
+        this.alpha = (1 - this.life/this.maxLife) * 0.6;
+      }
+      draw(ctx){
+        const g = ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.r);
+        g.addColorStop(0, this.col.replace('A',String(this.alpha)));
+        g.addColorStop(1, this.col.replace('A','0'));
+        ctx.beginPath();
+        ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+        ctx.fillStyle = g; ctx.fill();
+      }
+    }
+
+    // Sample pixel data from an offscreen canvas text/shape
+    function getPixelPoints(drawFn, density){
+      const off = document.createElement('canvas');
+      off.width  = smokeCanvas.width;
+      off.height = smokeCanvas.height;
+      const ctx2 = off.getContext('2d');
+      drawFn(ctx2, off.width, off.height);
+      const data = ctx2.getImageData(0,0,off.width,off.height).data;
+      const pts  = [];
+      for(let y=0;y<off.height;y+=density){
+        for(let x=0;x<off.width;x+=density){
+          const i=(y*off.width+x)*4;
+          if(data[i+3]>128) pts.push({x,y});
+        }
+      }
+      return pts;
+    }
+
+    function drawAwesomeText(ctx, W, H){
+      ctx.fillStyle = '#fff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const fs = Math.min(W*0.18, 160);
+      ctx.font = `900 ${fs}px Syne, sans-serif`;
+      ctx.fillText('AWESOME', W/2, H/2);
+    }
+
+    function drawSkullShape(ctx, W, H){
+      const cx = W/2, cy = H/2;
+      const sc = Math.min(W,H)*0.0022;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.scale(sc, sc);
+      ctx.fillStyle = '#fff';
+      // skull dome
+      ctx.beginPath();
+      ctx.arc(0,-20,80,Math.PI,0);
+      ctx.bezierCurveTo(80,20,60,70,30,80);
+      ctx.lineTo(30,100); ctx.lineTo(-30,100);
+      ctx.lineTo(-30,80);
+      ctx.bezierCurveTo(-60,70,-80,20,-80,20);
+      ctx.closePath(); ctx.fill();
+      // jaw
+      ctx.fillRect(-30,90,60,30);
+      // eye sockets (cut out)
+      ctx.globalCompositeOperation='destination-out';
+      ctx.beginPath(); ctx.ellipse(-28,-30,22,24,0,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(28,-30,22,24,0,0,Math.PI*2); ctx.fill();
+      // nose
+      ctx.beginPath(); ctx.ellipse(0,10,12,14,0,0,Math.PI*2); ctx.fill();
+      // teeth
+      for(let i=-2;i<=2;i++){
+        ctx.fillRect(i*20-8,98,14,20);
+      }
+      ctx.globalCompositeOperation='source-over';
+      ctx.restore();
+    }
+
+    function launchSmoke(mode){
+      smokeMode = mode;
+      smokeParticles = [];
+      const col = mode==='awesome' ? 'rgba(54,214,138,A)' : 'rgba(255,69,96,A)';
+      const drawFn = mode==='awesome' ? drawAwesomeText : drawSkullShape;
+      const pts = getPixelPoints(drawFn, 6);
+
+      // Burst particles from shape pixels
+      pts.forEach(pt=>{
+        if(Math.random()<0.35){
+          smokeParticles.push(new SmokeParticle(pt.x, pt.y, col));
+        }
+      });
+
+      smokeCanvas.classList.add('show');
+      if(smokeAnim) cancelAnimationFrame(smokeAnim);
+      animateSmoke();
+
+      // Auto-hide after 3.5s
+      setTimeout(closeMotiveOverlay, 3500);
+    }
+
+    function animateSmoke(){
+      smokeCtx.clearRect(0,0,smokeCanvas.width,smokeCanvas.height);
+      smokeParticles = smokeParticles.filter(p=>p.life<p.maxLife);
+      smokeParticles.forEach(p=>{p.update();p.draw(smokeCtx);});
+      if(smokeParticles.length>0){
+        smokeAnim = requestAnimationFrame(animateSmoke);
+      } else {
+        smokeCanvas.classList.remove('show');
+      }
+    }
+
+    function closeMotiveOverlay(){
+      document.getElementById('motiveOverlay').classList.remove('show');
+      smokeCanvas.classList.remove('show');
+      if(smokeAnim){ cancelAnimationFrame(smokeAnim); smokeAnim=null; }
+      smokeCtx.clearRect(0,0,smokeCanvas.width,smokeCanvas.height);
+    }
+
+    function showMotivation(mode, msg){
+      const overlay = document.getElementById('motiveOverlay');
+      const msgEl   = document.getElementById('motiveMsg');
+      msgEl.textContent = msg;
+      msgEl.className = 'motive-msg ' + mode;
+      overlay.classList.add('show');
+      // Delay smoke slightly so message appears first
+      setTimeout(()=>launchSmoke(mode), 300);
+    }
+
+    function checkMotivation(){
+      const results = subs.map(s=>calcSub(s)).filter(p=>p!==null);
+      if(!results.length) return;
+      const allAbove85 = results.every(p=>p>=85);
+      const anyBelow75 = results.some(p=>p<75);
+      if(allAbove85){
+        const msgs = [
+          "You're an attendance legend! 🎓",
+          "Professors actually know your name 😎",
+          "Your parents would be proud rn 🏆",
+          "You could teach the class at this point 📚",
+          "Built different. Respect. 💪"
+        ];
+        showMotivation('awesome', msgs[Math.floor(Math.random()*msgs.length)]);
+      } else if(anyBelow75){
+        const msgs = [
+          "Bro go to class before it's too late 💀",
+          "Your attendance is scarier than your exams 💀",
+          "Log off and attend something 💀",
+          "The faculty knows your face... wait, do they? 💀",
+          "Detention loading... 💀"
+        ];
+        showMotivation('skull', msgs[Math.floor(Math.random()*msgs.length)]);
+      }
+    }
 
     // ── MODAL HELPERS ─────────────────────────────
     function showExtNotice(){
