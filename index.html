@@ -6,9 +6,6 @@
   <title>KL Attendance Calculator</title>
   <meta name="description" content="KL University attendance calculator with bunk counter and target tracker."/>
 
-  <!-- EmailJS -->
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-  <script>emailjs.init("sZaWgU-npxQQKfbT8");</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
@@ -631,10 +628,7 @@
         <div class="step"><div class="sn">03</div><div class="st">Set target</div><div class="sd">Pick 75% or 85% — bunk allowance &amp; classes needed update accordingly.</div></div>
         <div class="step"><div class="sn">04</div><div class="st">Calculate</div><div class="sd">Press Calculate to see results, bunk allowance or classes needed.</div></div>
       </div>
-      <div class="formula">
-        % = [(La×100)+(Pa×50)+(Ta×25)+(Sa×25)] ÷ [(Lt×100)+(Pt×50)+(Tt×25)+(St×25)] × 100
-        <br><span>Empty fields excluded · Same formula as KL ERP · a = attended, t = conducted</span>
-      </div>
+
     </div>
 
     <!-- INSTALL -->
@@ -980,12 +974,13 @@
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 8l2.5 2.5 4.5-4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
             <div class="insight-body">
-              <div class="insight-title">Safe at ${p}% — but don't get too comfortable</div>
+              <div class="insight-title">Safe at ${p}% — ${p>=target?'above target but room to improve':'below your target of '+target+'%'}</div>
               <div class="insight-sub">${(()=>{
               const bp=canBunkPerComp(s,target);
-              if(bp.length===0) return 'You are right at the edge — attend every class to avoid dropping below '+target+'%';
+              if(p<target) return 'You are below your '+target+'% target — attend more classes to reach it';
+              if(bp.length===0) return 'You are right at '+target+'% — attend every class to stay safe';
               const best=bp.reduce((a,c)=>c.count>a.count?c:a,bp[0]);
-              return 'You can bunk '+b+' more class'+(b>1?'es':'')+' total — most room in '+best.label+' ('+best.count+' class'+(best.count>1?'es':'')+') — attend regularly to stay safe';
+              return 'You can bunk '+b+' more class'+(b>1?'es':'')+' and stay above '+target+'% — most room in '+best.label+' ('+best.count+' class'+(best.count>1?'es':'')+')';
             })()}</div>
             </div>
           </div>`;
@@ -1413,33 +1408,40 @@
 
       if(!msg){ toast('Please write a message first.'); return; }
 
-      // Disable button while sending
       btn.disabled = true;
       btn.textContent = 'Sending...';
 
-      const templateParams = {
-        name:    name || 'Anonymous',
-        title:   type,
-        type:    type,
-        message: msg,
-        email:   'no-reply@klattendance.com',
+      const data = {
+        access_key: '5866276b-6609-4a33-879c-c2c6b1a8031b',
+        name:       name || 'Anonymous',
+        subject:    '[KL Attendance] ' + type + ' from ' + (name || 'Anonymous'),
+        message:    'Type: ' + type + '\n\n' + msg,
       };
 
-      emailjs.send('service_e1pandz', 'template_riy4u9h', templateParams)
-        .then(()=>{
+      fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      .then(r => r.json())
+      .then(res => {
+        if(res.success){
           document.getElementById('fbSuccess').classList.add('show');
           document.getElementById('fbName').value = '';
           document.getElementById('fbMsg').value = '';
           btn.disabled = false;
           btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M1 7l5 5 7-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Send Feedback';
           setTimeout(()=>document.getElementById('fbSuccess').classList.remove('show'), 5000);
-        })
-        .catch((err)=>{
-          console.error('EmailJS error:', err);
-          toast('Failed to send. Please try again.');
-          btn.disabled = false;
-          btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M1 7l5 5 7-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Send Feedback';
-        });
+        } else {
+          throw new Error(res.message||'Failed');
+        }
+      })
+      .catch(err => {
+        console.error('Web3Forms error:', err);
+        toast('Failed to send. Please try again.');
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M1 7l5 5 7-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Send Feedback';
+      });
     }
   </script>
 </body>
