@@ -1397,37 +1397,27 @@
     },{threshold:0.5});
     document.querySelectorAll('.sec-title').forEach(el=>secObserver.observe(el));
 
-    // ERP extension listener — fires ONCE only
-    let erpSynced = false;
-
-    function handleERPData(subjects){
-      if(erpSynced) return; // prevent duplicate fires
-      if(!Array.isArray(subjects)||!subjects.length) return;
-      erpSynced = true;
-      sessionStorage.removeItem('klu_erp_data'); // clear so reload doesn't re-fire
-      subs=subs.filter(s=>!s.fromERP);
-      subjects.forEach(d=>{const s=mk(d);s.fromERP=true;subs.unshift(s);});
-      calculated=true;render();setHint(true);
-      toast('⚡ '+subjects.length+' subjects synced from ERP!');
-      document.getElementById('cardsEl').scrollIntoView({behavior:'smooth',block:'start'});
-    }
-
-    window.addEventListener('message',function(e){
-      if(!e.data||e.data.type!=='KL_ATTENDANCE_DATA') return;
-      handleERPData(e.data.subjects);
-    });
-
-    // Check sessionStorage once on load
+    // ERP extension — reads sessionStorage ONCE on page load, then clears it
     (function(){
       try{
-        const raw=sessionStorage.getItem('klu_erp_data');
-        if(raw){
-          const parsed=JSON.parse(raw);
-          if(parsed&&parsed.type==='KL_ATTENDANCE_DATA'){
-            setTimeout(()=>handleERPData(parsed.subjects), 300);
-          }
-        }
-      }catch(e){}
+        const raw = sessionStorage.getItem('klu_erp_data');
+        if(!raw) return;
+        sessionStorage.removeItem('klu_erp_data'); // clear immediately so refresh doesn't re-fire
+        const parsed = JSON.parse(raw);
+        if(!parsed || parsed.type !== 'KL_ATTENDANCE_DATA') return;
+        const subjects = parsed.subjects;
+        if(!Array.isArray(subjects) || !subjects.length) return;
+        // Wait for page JS to fully init before filling
+        setTimeout(function(){
+          subs = subs.filter(s => !s.fromERP);
+          subjects.forEach(d => { const s=mk(d); s.fromERP=true; subs.unshift(s); });
+          calculated = true;
+          render();
+          setHint(true);
+          toast('⚡ '+subjects.length+' subjects synced from ERP!');
+          document.getElementById('cardsEl').scrollIntoView({behavior:'smooth', block:'start'});
+        }, 400);
+      }catch(e){ console.error('ERP sync error:', e); }
     })();
 
     // ── Start with 2 blank subjects ──
