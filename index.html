@@ -1402,10 +1402,9 @@
     subs.push(mk());
     render();
 
-    // ERP extension sync — handles both custom event (existing tab) and sessionStorage (new tab)
+    // ERP extension sync — reads data from URL hash (#erp=base64data)
     function applyERPData(subjects){
       if(!Array.isArray(subjects) || !subjects.length) return;
-      sessionStorage.removeItem('klu_erp_data');
       subs = subs.filter(s => !s.fromERP);
       subjects.forEach(d => { const s=mk(d); s.fromERP=true; subs.unshift(s); });
       calculated = true;
@@ -1413,21 +1412,20 @@
       setHint(true);
       toast('⚡ '+subjects.length+' subjects synced from ERP!');
       document.getElementById('cardsEl').scrollIntoView({behavior:'smooth', block:'start'});
+      // Clean the hash from URL without reloading
+      history.replaceState(null, '', window.location.pathname);
     }
 
-    // Listen for custom event fired by extension on existing tab
-    window.addEventListener('klu_erp_sync', function(e){
-      if(e.detail && e.detail.subjects) applyERPData(e.detail.subjects);
-    });
-
-    // Read sessionStorage on new tab load
+    // Read from URL hash on load
     (function(){
       try{
-        const raw = sessionStorage.getItem('klu_erp_data');
-        if(!raw) return;
-        const parsed = JSON.parse(raw);
-        if(parsed && parsed.type === 'KL_ATTENDANCE_DATA') applyERPData(parsed.subjects);
-      }catch(e){ console.error('ERP sync error:', e); }
+        const hash = window.location.hash;
+        if(!hash || !hash.startsWith('#erp=')) return;
+        const encoded = hash.slice(5);
+        const decoded = decodeURIComponent(escape(atob(encoded)));
+        const subjects = JSON.parse(decoded);
+        applyERPData(subjects);
+      }catch(e){ console.error('ERP hash error:', e); }
     })();
 
     /* ═══════════════════════════════════════════
