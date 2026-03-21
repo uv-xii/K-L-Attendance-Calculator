@@ -1397,9 +1397,14 @@
     },{threshold:0.5});
     document.querySelectorAll('.sec-title').forEach(el=>secObserver.observe(el));
 
-    // ERP extension listener — handles postMessage from extension
+    // ERP extension listener — fires ONCE only
+    let erpSynced = false;
+
     function handleERPData(subjects){
+      if(erpSynced) return; // prevent duplicate fires
       if(!Array.isArray(subjects)||!subjects.length) return;
+      erpSynced = true;
+      sessionStorage.removeItem('klu_erp_data'); // clear so reload doesn't re-fire
       subs=subs.filter(s=>!s.fromERP);
       subjects.forEach(d=>{const s=mk(d);s.fromERP=true;subs.unshift(s);});
       calculated=true;render();setHint(true);
@@ -1412,16 +1417,14 @@
       handleERPData(e.data.subjects);
     });
 
-    // Fallback: check sessionStorage on load (set by extension before redirect)
+    // Check sessionStorage once on load
     (function(){
       try{
         const raw=sessionStorage.getItem('klu_erp_data');
         if(raw){
-          sessionStorage.removeItem('klu_erp_data');
           const parsed=JSON.parse(raw);
           if(parsed&&parsed.type==='KL_ATTENDANCE_DATA'){
-            // Delay to let page render first
-            setTimeout(()=>handleERPData(parsed.subjects),500);
+            setTimeout(()=>handleERPData(parsed.subjects), 300);
           }
         }
       }catch(e){}
