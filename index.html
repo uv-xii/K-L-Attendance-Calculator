@@ -1402,23 +1402,31 @@
     subs.push(mk());
     render();
 
-    // ERP extension — reads sessionStorage AFTER everything is initialised
+    // ERP extension sync — handles both custom event (existing tab) and sessionStorage (new tab)
+    function applyERPData(subjects){
+      if(!Array.isArray(subjects) || !subjects.length) return;
+      sessionStorage.removeItem('klu_erp_data');
+      subs = subs.filter(s => !s.fromERP);
+      subjects.forEach(d => { const s=mk(d); s.fromERP=true; subs.unshift(s); });
+      calculated = true;
+      render();
+      setHint(true);
+      toast('⚡ '+subjects.length+' subjects synced from ERP!');
+      document.getElementById('cardsEl').scrollIntoView({behavior:'smooth', block:'start'});
+    }
+
+    // Listen for custom event fired by extension on existing tab
+    window.addEventListener('klu_erp_sync', function(e){
+      if(e.detail && e.detail.subjects) applyERPData(e.detail.subjects);
+    });
+
+    // Read sessionStorage on new tab load
     (function(){
       try{
         const raw = sessionStorage.getItem('klu_erp_data');
         if(!raw) return;
-        sessionStorage.removeItem('klu_erp_data');
         const parsed = JSON.parse(raw);
-        if(!parsed || parsed.type !== 'KL_ATTENDANCE_DATA') return;
-        const subjects = parsed.subjects;
-        if(!Array.isArray(subjects) || !subjects.length) return;
-        subs = subs.filter(s => !s.fromERP);
-        subjects.forEach(d => { const s=mk(d); s.fromERP=true; subs.unshift(s); });
-        calculated = true;
-        render();
-        setHint(true);
-        toast('⚡ '+subjects.length+' subjects synced from ERP!');
-        document.getElementById('cardsEl').scrollIntoView({behavior:'smooth', block:'start'});
+        if(parsed && parsed.type === 'KL_ATTENDANCE_DATA') applyERPData(parsed.subjects);
       }catch(e){ console.error('ERP sync error:', e); }
     })();
 
