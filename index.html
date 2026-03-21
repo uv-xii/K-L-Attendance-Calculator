@@ -389,6 +389,25 @@
 
     /* ── INSTALL ── */
     .install-sec{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);padding:22px;margin:26px 0;}
+    .download-btn{
+      display:inline-flex;align-items:center;gap:9px;
+      background:var(--acc);color:#fff;border:none;border-radius:100px;
+      padding:12px 24px;font-size:14px;font-weight:700;
+      text-decoration:none;font-family:'Syne',sans-serif;
+      transition:all 0.2s;box-shadow:0 4px 18px rgba(91,82,255,0.3);
+      margin:16px 0;
+    }
+    .download-btn:hover{background:#7068ff;transform:translateY(-2px);box-shadow:0 6px 24px rgba(91,82,255,0.4);}
+    .ext-note{
+      display:inline-flex;align-items:center;gap:6px;
+      font-size:11px;color:var(--txt3);margin-left:12px;
+    }
+    .ext-badge{
+      display:inline-flex;align-items:center;gap:6px;
+      background:rgba(54,214,138,0.1);border:1px solid rgba(54,214,138,0.2);
+      border-radius:100px;padding:4px 12px;font-size:11px;
+      color:var(--safe);font-weight:600;margin-bottom:16px;
+    }
     .install-list{display:flex;flex-direction:column;gap:12px;margin-top:14px;}
     .i-step{display:flex;gap:12px;align-items:flex-start;}
     .i-num{
@@ -768,13 +787,85 @@
     <!-- INSTALL -->
     <div class="install-sec" id="install">
       <div class="sec-title">Install Chrome Extension</div>
-      <p style="font-size:12px;color:var(--txt2);margin-bottom:2px;">Reads your ERP attendance page and fills all subjects automatically — no passwords stored.</p>
+      <div class="ext-badge">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="currentColor" stroke-width="1"/><path d="M3 5l1.5 1.5 2.5-2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Free · No login · No passwords stored
+      </div>
+      <p style="font-size:13px;color:var(--txt2);margin-bottom:6px;line-height:1.6;">
+        Our Chrome extension reads your ERP attendance page and fills all subjects into the calculator automatically. One click — done.
+      </p>
+
+      <!-- DOWNLOAD BUTTON -->
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:18px 0;">
+        <a href="https://github.com/uv-xii/K-L-Attendance-Calculator/raw/main/kl-extension.zip"
+          download="kl-extension.zip"
+          class="download-btn">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M8 2v8M5 7l3 3 3-3M2 11v2a1 1 0 001 1h10a1 1 0 001-1v-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Download Extension
+        </a>
+        <span class="ext-note">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1"/><path d="M6 4v3M6 8.5v.3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          Works on Chrome &amp; Edge
+        </span>
+      </div>
+
+      <!-- INSTALL STEPS -->
+      <div style="font-size:12px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;">Installation steps</div>
       <div class="install-list">
-        <div class="i-step"><div class="i-num">1</div><div><div class="i-title">Download the extension</div><div class="i-desc">Download <code>kl-attendance-extension.zip</code> and unzip it.</div></div></div>
-        <div class="i-step"><div class="i-num">2</div><div><div class="i-title">Open Chrome Extensions</div><div class="i-desc">Type <code>chrome://extensions</code> in your address bar.</div></div></div>
-        <div class="i-step"><div class="i-num">3</div><div><div class="i-title">Enable Developer Mode</div><div class="i-desc">Toggle "Developer mode" on — top right corner.</div></div></div>
-        <div class="i-step"><div class="i-num">4</div><div><div class="i-title">Load the extension</div><div class="i-desc">Click "Load unpacked" → select the unzipped <code>extension</code> folder.</div></div></div>
-        <div class="i-step"><div class="i-num">5</div><div><div class="i-title">Sync from ERP</div><div class="i-desc">Log into <code>newerp.kluniversity.in</code> → attendance page → click extension icon → press <strong>Send to Calculator</strong>.</div></div></div>
+        <div class="i-step">
+          <div class="i-num">1</div>
+          <div>
+            <div class="i-title">Download &amp; unzip</div>
+            <div class="i-desc">Click the Download button above. Once downloaded, right-click the zip → <strong>Extract All</strong> → extract to a folder you'll remember.</div>
+          </div>
+        </div>
+        <div class="i-step">
+          <div class="i-num">2</div>
+          <div>
+            <div class="i-title">Open Chrome Extensions</div>
+            <div class="i-desc">In Chrome, type <code>chrome://extensions</code> in the address bar and press Enter.</div>
+          </div>
+        </div>
+        <div class="i-step">
+          <div class="i-num">3</div>
+          <div>
+            <div class="i-title">Turn on Developer Mode</div>
+            <div class="i-desc">Toggle <strong>Developer mode</strong> on — it's in the top right corner of the Extensions page.</div>
+          </div>
+        </div>
+        <div class="i-step">
+          <div class="i-num">4</div>
+          <div>
+            <div class="i-title">Load the extension</div>
+            <div class="i-desc">Click <strong>Load unpacked</strong> → navigate into the unzipped folder → select the <strong>inner</strong> <code>kl-extension</code> folder that contains <code>manifest.json</code> → click Select Folder.</div>
+          </div>
+        </div>
+        <div class="i-step">
+          <div class="i-num">5</div>
+          <div>
+            <div class="i-title">Open ERP &amp; search</div>
+            <div class="i-desc">Go to <code>newerp.kluniversity.in</code> → log in → click <strong>Attendance Register</strong> → select year &amp; semester → press <strong>Search</strong>.</div>
+          </div>
+        </div>
+        <div class="i-step">
+          <div class="i-num">6</div>
+          <div>
+            <div class="i-title">Sync to calculator ⚡</div>
+            <div class="i-desc">Click the extension icon in your Chrome toolbar → your subjects appear → click <strong>Send to Calculator</strong> → done! All subjects auto-fill instantly.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TROUBLESHOOT -->
+      <div style="background:var(--s2);border-radius:10px;padding:14px 16px;margin-top:16px;">
+        <div style="font-size:12px;font-weight:600;color:var(--txt2);margin-bottom:8px;">⚠ Common issues</div>
+        <div style="font-size:12px;color:var(--txt2);line-height:1.8;">
+          <strong style="color:var(--txt)">No data found?</strong> Make sure you pressed Search on the ERP page first.<br>
+          <strong style="color:var(--txt)">Wrong folder selected?</strong> Select the inner folder that has <code>manifest.json</code> inside it.<br>
+          <strong style="color:var(--txt)">Extension not showing?</strong> Click the puzzle piece 🧩 icon in Chrome toolbar to pin it.
+        </div>
       </div>
     </div>
 
@@ -1306,16 +1397,35 @@
     },{threshold:0.5});
     document.querySelectorAll('.sec-title').forEach(el=>secObserver.observe(el));
 
-    // ERP extension listener
-    window.addEventListener('message',function(e){
-      if(!e.data||e.data.type!=='KL_ATTENDANCE_DATA')return;
-      const data=e.data.subjects;
-      if(!Array.isArray(data)||!data.length)return;
+    // ERP extension listener — handles postMessage from extension
+    function handleERPData(subjects){
+      if(!Array.isArray(subjects)||!subjects.length) return;
       subs=subs.filter(s=>!s.fromERP);
-      data.forEach(d=>{const s=mk(d);s.fromERP=true;subs.unshift(s);});
+      subjects.forEach(d=>{const s=mk(d);s.fromERP=true;subs.unshift(s);});
       calculated=true;render();setHint(true);
-      toast('⚡ '+data.length+' subjects synced from ERP!');
+      toast('⚡ '+subjects.length+' subjects synced from ERP!');
+      document.getElementById('cardsEl').scrollIntoView({behavior:'smooth',block:'start'});
+    }
+
+    window.addEventListener('message',function(e){
+      if(!e.data||e.data.type!=='KL_ATTENDANCE_DATA') return;
+      handleERPData(e.data.subjects);
     });
+
+    // Fallback: check sessionStorage on load (set by extension before redirect)
+    (function(){
+      try{
+        const raw=sessionStorage.getItem('klu_erp_data');
+        if(raw){
+          sessionStorage.removeItem('klu_erp_data');
+          const parsed=JSON.parse(raw);
+          if(parsed&&parsed.type==='KL_ATTENDANCE_DATA'){
+            // Delay to let page render first
+            setTimeout(()=>handleERPData(parsed.subjects),500);
+          }
+        }
+      }catch(e){}
+    })();
 
     // ── Start with 2 blank subjects ──
     subs.push(mk());
