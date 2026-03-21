@@ -661,25 +661,17 @@
           <span class="toggle-icon" id="themeIcon">🌙</span>
           <span id="themeLabel">Light</span>
         </button>
-        <button class="nav-ext" onclick="showExtNotice()">
+        <a href="#install" class="nav-ext">
           <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
             <rect x="1" y="1" width="12" height="12" rx="3" stroke="currentColor" stroke-width="1.2"/>
             <path d="M4 7h6M7 4v6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
           </svg>
           Get Extension
-        </button>
+        </a>
       </div>
     </nav>
 
-    <!-- EXTENSION NOTICE MODAL -->
-    <div class="modal-overlay" id="extModal" onclick="closeModal('extModal')" aria-hidden="true" style="display:none" data-modal>
-      <div class="modal-box" onclick="event.stopPropagation()">
-        <div class="modal-icon">🔌</div>
-        <div class="modal-title">Extension Coming Soon</div>
-        <div class="modal-body">The KL Attendance Chrome Extension is currently under development. It will auto-fill your attendance directly from the KL ERP — no typing needed.<br><br>Stay tuned! We'll notify you when it's ready.</div>
-        <button class="modal-btn" onclick="closeModal('extModal')">Got it!</button>
-      </div>
-    </div>
+
 
     <!-- SHARE MODAL -->
     <div class="modal-overlay" id="shareModal" onclick="closeModal('shareModal')">
@@ -1607,11 +1599,7 @@
     }
 
     // ── MODAL HELPERS ─────────────────────────────
-    function showExtNotice(){
-      const m=document.getElementById('extModal');
-      m.style.display='flex';
-      setTimeout(()=>m.classList.add('open'),10);
-    }
+
     function closeModal(id){
       const m=document.getElementById(id);
       m.classList.remove('open');
