@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KLU Attendance</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      width:300px;min-height:200px;
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      background:#07090f;color:#e2e6f3;
+    }
+
+    .header{
+      background:linear-gradient(135deg,rgba(91,82,255,0.2),rgba(54,214,138,0.1));
+      border-bottom:1px solid #1f2638;
+      padding:16px 18px 14px;
+    }
+    .logo{
+      font-size:15px;font-weight:700;
+      background:linear-gradient(135deg,#fff,#a09bff);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text;margin-bottom:2px;
+    }
+    .logo-sub{font-size:11px;color:#7e8ba8;}
+
+    .body{padding:14px 16px;}
+
+    /* Status */
+    .status-box{
+      background:#0e111a;border:1px solid #1f2638;border-radius:10px;
+      padding:11px 13px;margin-bottom:12px;
+      display:flex;align-items:flex-start;gap:9px;
+    }
+    .status-dot{
+      width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:3px;
+    }
+    .dot-ok    {background:#36d68a;box-shadow:0 0 6px #36d68a;}
+    .dot-warn  {background:#f59e0b;box-shadow:0 0 6px #f59e0b;}
+    .dot-idle  {background:#3d4761;}
+    .status-title{font-size:12px;font-weight:600;color:#e2e6f3;margin-bottom:2px;}
+    .status-desc {font-size:11px;color:#7e8ba8;line-height:1.5;}
+
+    /* Subject preview */
+    .preview{display:none;flex-direction:column;gap:5px;margin-bottom:12px;}
+    .preview.show{display:flex;}
+    .prev-row{
+      background:#0e111a;border:1px solid #1f2638;border-radius:7px;
+      padding:7px 11px;display:flex;justify-content:space-between;align-items:center;
+    }
+    .prev-name{font-size:11px;font-weight:500;color:#e2e6f3;flex:1;min-width:0;
+      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:8px;}
+    .prev-pct{font-size:11px;font-weight:700;}
+    .pct-safe  {color:#36d68a;}
+    .pct-warn  {color:#f59e0b;}
+    .pct-dng   {color:#ff4560;}
+
+    /* Buttons */
+    .btn-sync{
+      width:100%;background:#5b52ff;color:#fff;border:none;
+      border-radius:100px;padding:11px;font-size:13px;font-weight:600;
+      cursor:pointer;display:flex;align-items:center;justify-content:center;
+      gap:8px;transition:background 0.2s;font-family:inherit;margin-bottom:7px;
+    }
+    .btn-sync:hover{background:#7068ff;}
+    .btn-sync:disabled{background:#2a3249;color:#3d4761;cursor:not-allowed;}
+
+    .btn-open{
+      width:100%;background:transparent;color:#a09bff;
+      border:1px solid rgba(91,82,255,0.3);border-radius:100px;
+      padding:9px;font-size:12px;font-weight:500;
+      cursor:pointer;display:flex;align-items:center;justify-content:center;
+      gap:6px;transition:background 0.2s;font-family:inherit;margin-bottom:8px;
+    }
+    .btn-open:hover{background:rgba(91,82,255,0.1);}
+
+    .hint{font-size:11px;color:#3d4761;text-align:center;line-height:1.5;padding:0 4px;}
+
+    /* Spinner */
+    .spinner{
+      width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);
+      border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;display:none;
+    }
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* Error */
+    .error-box{
+      background:rgba(255,69,96,0.08);border:1px solid rgba(255,69,96,0.3);
+      border-radius:8px;padding:9px 12px;font-size:11px;color:#ff4560;
+      margin-bottom:10px;display:none;line-height:1.5;
+    }
+
+    /* Steps guide */
+    .steps{margin-top:4px;}
+    .step-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;}
+    .step-num{
+      width:18px;height:18px;border-radius:50%;flex-shrink:0;
+      background:rgba(91,82,255,0.2);border:1px solid rgba(91,82,255,0.35);
+      display:flex;align-items:center;justify-content:center;
+      font-size:9px;font-weight:700;color:#a09bff;
+    }
+    .step-txt{font-size:11px;color:#7e8ba8;line-height:1.5;padding-top:1px;}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">KLU Attendance</div>
+    <div class="logo-sub">Sync from ERP · Calculate instantly</div>
+  </div>
+
+  <div class="body">
+    <div class="status-box" id="statusBox">
+      <div class="status-dot dot-idle" id="statusDot"></div>
+      <div>
+        <div class="status-title" id="statusTitle">Not on ERP page</div>
+        <div class="status-desc" id="statusDesc">Open your KL ERP attendance page first.</div>
+      </div>
+    </div>
+
+    <div class="error-box" id="errorBox"></div>
+    <div class="preview" id="preview"></div>
+
+    <button class="btn-sync" id="syncBtn" disabled>
+      <div class="spinner" id="spinner"></div>
+      <span id="syncLabel">Open ERP first</span>
+    </button>
+
+    <button class="btn-open" id="openCalcBtn">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <path d="M2 10L10 2M10 2H5M10 2v5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Open Calculator
+    </button>
+
+    <div class="hint" id="hintText"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
