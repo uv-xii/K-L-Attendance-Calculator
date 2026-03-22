@@ -1371,17 +1371,20 @@
       calculated=false;setHint(false);render();
     }
 
-    function upN(id,v){const s=subs.find(s=>s.id===id);if(s)s.name=v;}
+    function upN(id,v){const s=subs.find(s=>s.id===id);if(s){s.name=v;saveToStorage();}}
 
     function upV(id,k,v){
       const s=subs.find(s=>s.id===id);if(!s)return;
       s[k]=Math.max(0,parseFloat(v)||0)||'';
       if(calculated){calculated=false;setHint(false);render();}
+      else saveToStorage();
     }
 
     function clearAll(){
       if(!confirm('Clear all subjects?'))return;
-      subs=[];uid=0;calculated=false;render();setHint(false);
+      subs=[];uid=0;calculated=false;
+      clearStorage();
+      render();setHint(false);
     }
 
     function toast(msg){
@@ -1398,10 +1401,60 @@
     },{threshold:0.5});
     document.querySelectorAll('.sec-title').forEach(el=>secObserver.observe(el));
 
-    // ── Start with 2 blank subjects ──
-    subs.push(mk());
-    subs.push(mk());
+    // ── localStorage save/load ──────────────────────────────────────────────
+    const LS_KEY = 'klu_subs_v1';
+
+    function saveToStorage(){
+      try{
+        localStorage.setItem(LS_KEY, JSON.stringify({
+          subs: subs.map(s=>({...s})),
+          uid,
+          target,
+          calculated
+        }));
+      }catch(e){}
+    }
+
+    function loadFromStorage(){
+      try{
+        const raw = localStorage.getItem(LS_KEY);
+        if(!raw) return false;
+        const data = JSON.parse(raw);
+        if(!data || !Array.isArray(data.subs) || !data.subs.length) return false;
+        subs = data.subs;
+        uid  = data.uid || subs.length;
+        if(data.target) target = data.target;
+        // Sync target buttons
+        document.querySelectorAll('.tbtn').forEach(b=>{
+          b.classList.toggle('on', parseInt(b.dataset.val||b.textContent)===target);
+        });
+        return true;
+      }catch(e){ return false; }
+    }
+
+    function clearStorage(){
+      try{ localStorage.removeItem(LS_KEY); }catch(e){}
+    }
+
+    // Auto-save whenever anything changes
+    const _origRender = render;
+    render = function(){
+      _origRender();
+      saveToStorage();
+    };
+
+    // ── Start: load saved or show 2 blank subjects ──
+    const loaded = loadFromStorage();
+    if(!loaded){
+      subs.push(mk());
+      subs.push(mk());
+    }
     render();
+
+    // Show a subtle "data restored" toast if we loaded saved data
+    if(loaded){
+      setTimeout(()=>toast('📂 Your subjects were restored from last session!'), 800);
+    }
 
     // ERP extension sync — reads data from URL hash (#erp=base64data)
     function applyERPData(subjects){
