@@ -1456,30 +1456,29 @@
       setTimeout(()=>toast('📂 Your subjects were restored from last session!'), 800);
     }
 
-    // ERP extension sync — reads data from URL hash (#erp=base64data)
-    function applyERPData(subjects){
-      if(!Array.isArray(subjects) || !subjects.length) return;
-      subs = subs.filter(s => !s.fromERP);
-      subjects.forEach(d => { const s=mk(d); s.fromERP=true; subs.unshift(s); });
-      calculated = true;
-      render();
-      setHint(true);
-      toast('⚡ '+subjects.length+' subjects synced from ERP!');
-      document.getElementById('cardsEl').scrollIntoView({behavior:'smooth', block:'start'});
-      // Clean the hash from URL without reloading
-      history.replaceState(null, '', window.location.pathname);
-    }
-
-    // Read from URL hash on load
+    // ERP extension sync — reads from localStorage on page load
     (function(){
       try{
-        const hash = window.location.hash;
-        if(!hash || !hash.startsWith('#erp=')) return;
-        const encoded = hash.slice(5);
-        const decoded = decodeURIComponent(escape(atob(encoded)));
-        const subjects = JSON.parse(decoded);
-        applyERPData(subjects);
-      }catch(e){ console.error('ERP hash error:', e); }
+        const raw = localStorage.getItem('klu_erp_pending');
+        if(!raw) return;
+        const parsed = JSON.parse(raw);
+        if(!parsed || parsed.type !== 'KL_ATTENDANCE_DATA') return;
+        // Only use if fresh (within last 30 seconds)
+        if(Date.now() - (parsed.ts||0) > 30000) {
+          localStorage.removeItem('klu_erp_pending');
+          return;
+        }
+        localStorage.removeItem('klu_erp_pending'); // clear immediately
+        const subjects = parsed.subjects;
+        if(!Array.isArray(subjects) || !subjects.length) return;
+        subs = subs.filter(s => !s.fromERP);
+        subjects.forEach(d => { const s=mk(d); s.fromERP=true; subs.unshift(s); });
+        calculated = true;
+        render();
+        setHint(true);
+        toast('⚡ '+subjects.length+' subjects synced from ERP!');
+        document.getElementById('cardsEl').scrollIntoView({behavior:'smooth', block:'start'});
+      }catch(e){ console.error('ERP sync error:', e); }
     })();
 
     /* ═══════════════════════════════════════════
