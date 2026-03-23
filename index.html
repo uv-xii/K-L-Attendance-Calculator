@@ -1468,11 +1468,13 @@
           localStorage.removeItem('klu_erp_pending');
           return;
         }
-        localStorage.removeItem('klu_erp_pending'); // clear immediately
+        localStorage.removeItem('klu_erp_pending');
         const subjects = parsed.subjects;
         if(!Array.isArray(subjects) || !subjects.length) return;
-        subs = subs.filter(s => !s.fromERP);
-        subjects.forEach(d => { const s=mk(d); s.fromERP=true; subs.unshift(s); });
+        // Completely replace everything with ERP data
+        subs = [];
+        uid = 0;
+        subjects.forEach(d => { const s=mk(d); s.fromERP=true; subs.push(s); });
         calculated = true;
         render();
         setHint(true);
