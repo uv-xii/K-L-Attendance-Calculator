@@ -1443,45 +1443,36 @@
       saveToStorage();
     };
 
-    // ── Start: load saved or show 2 blank subjects ──
-    const loaded = loadFromStorage();
-    if(!loaded){
-      subs.push(mk());
-      subs.push(mk());
-    }
-    render();
-
-    // Show a subtle "data restored" toast if we loaded saved data
-    if(loaded){
-      setTimeout(()=>toast('📂 Your subjects were restored from last session!'), 800);
-    }
-
-    // ERP extension sync — reads from localStorage on page load
+    // ── Check for ERP data from URL hash FIRST before loading saved session ──
+    let erpLoaded = false;
     (function(){
       try{
-        const raw = localStorage.getItem('klu_erp_pending');
-        if(!raw) return;
-        const parsed = JSON.parse(raw);
-        if(!parsed || parsed.type !== 'KL_ATTENDANCE_DATA') return;
-        // Only use if fresh (within last 30 seconds)
-        if(Date.now() - (parsed.ts||0) > 30000) {
-          localStorage.removeItem('klu_erp_pending');
-          return;
-        }
-        localStorage.removeItem('klu_erp_pending');
-        const subjects = parsed.subjects;
+        const hash = window.location.hash;
+        if(!hash || !hash.startsWith('#erp=')) return;
+        const encoded = hash.slice(5);
+        const subjects = JSON.parse(decodeURIComponent(escape(atob(encoded))));
         if(!Array.isArray(subjects) || !subjects.length) return;
-        // Completely replace everything with ERP data
-        subs = [];
-        uid = 0;
+        // Clean hash from URL
+        history.replaceState(null, '', window.location.pathname);
+        subs = []; uid = 0;
         subjects.forEach(d => { const s=mk(d); s.fromERP=true; subs.push(s); });
         calculated = true;
-        render();
-        setHint(true);
-        toast('⚡ '+subjects.length+' subjects synced from ERP!');
-        document.getElementById('cardsEl').scrollIntoView({behavior:'smooth', block:'start'});
-      }catch(e){ console.error('ERP sync error:', e); }
+        erpLoaded = true;
+      }catch(e){}
     })();
+
+    // ── Only load saved session if NO ERP data came in ──
+    if(!erpLoaded){
+      const loaded = loadFromStorage();
+      if(!loaded){ subs.push(mk()); subs.push(mk()); }
+      render();
+      if(loaded) setTimeout(()=>toast('📂 Your subjects were restored from last session!'), 800);
+    } else {
+      render();
+      setHint(true);
+      toast('⚡ '+ subs.length +' subjects synced from ERP!');
+      setTimeout(()=>document.getElementById('cardsEl').scrollIntoView({behavior:'smooth', block:'start'}), 300);
+    }
 
     /* ═══════════════════════════════════════════
        SMOKE TEXT / SKULL CANVAS EFFECT
