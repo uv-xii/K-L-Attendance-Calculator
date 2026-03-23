@@ -800,7 +800,8 @@
       <div style="display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:18px 0;">
         <a href="https://github.com/uv-xii/K-L-Attendance-Calculator/raw/main/kl-extension.zip"
           download="kl-extension.zip"
-          class="download-btn">
+          class="download-btn"
+          onclick="showChromeStoreNotice()">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <path d="M8 2v8M5 7l3 3 3-3M2 11v2a1 1 0 001 1h10a1 1 0 001-1v-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
@@ -810,6 +811,17 @@
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1"/><path d="M6 4v3M6 8.5v.3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
           Works on Chrome &amp; Edge
         </span>
+      </div>
+
+      <!-- CHROME STORE NOTICE -->
+      <div id="chromeStoreNotice" style="background:linear-gradient(135deg,rgba(91,82,255,0.1),rgba(54,214,138,0.06));border:1px solid rgba(91,82,255,0.25);border-radius:12px;padding:14px 16px;margin-bottom:16px;">
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <span style="font-size:20px;flex-shrink:0;">🎉</span>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px;">Coming to Chrome Web Store next week!</div>
+            <div style="font-size:12px;color:var(--txt2);line-height:1.6;">For now, install manually using the zip below. Once it's on the Chrome Web Store you'll be able to install it in one click — no zip needed. We'll update this page when it's live!</div>
+          </div>
+        </div>
       </div>
 
       <!-- INSTALL STEPS -->
@@ -1700,6 +1712,12 @@
       document.body.classList.add('light');
       document.getElementById('themeIcon').textContent='☀️';
       document.getElementById('themeLabel').textContent='Dark';
+    }
+
+    // ── CHROME STORE NOTICE ───────────────────────
+    function showChromeStoreNotice(){
+      const el = document.getElementById('chromeStoreNotice');
+      if(el) { el.style.display='block'; el.scrollIntoView({behavior:'smooth', block:'nearest'}); }
     }
 
     // ── FEEDBACK ──────────────────────────────────
