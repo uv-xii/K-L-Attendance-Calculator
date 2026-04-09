@@ -1082,22 +1082,23 @@
     }
 
     function n(x){return parseFloat(x)||0;}
+    function has(x){return x!==''&&x!==null&&x!==undefined&&String(x).trim()!=='';}
 
     function calcSub(s){
       let wa=0,wt=0;
-      if(n(s.La)&&n(s.Lt)){wa+=n(s.La)*W2.L;wt+=n(s.Lt)*W2.L;}
-      if(n(s.Pa)&&n(s.Pt)){wa+=n(s.Pa)*W2.P;wt+=n(s.Pt)*W2.P;}
-      if(n(s.Ta)&&n(s.Tt)){wa+=n(s.Ta)*W2.T;wt+=n(s.Tt)*W2.T;}
-      if(n(s.Sa)&&n(s.St)){wa+=n(s.Sa)*W2.S;wt+=n(s.St)*W2.S;}
+      if(has(s.Lt)&&has(s.La)){wa+=n(s.La)*W2.L;wt+=n(s.Lt)*W2.L;}
+      if(has(s.Pt)&&has(s.Pa)){wa+=n(s.Pa)*W2.P;wt+=n(s.Pt)*W2.P;}
+      if(has(s.Tt)&&has(s.Ta)){wa+=n(s.Ta)*W2.T;wt+=n(s.Tt)*W2.T;}
+      if(has(s.St)&&has(s.Sa)){wa+=n(s.Sa)*W2.S;wt+=n(s.St)*W2.S;}
       return wt===0?null:Math.round(wa/wt*10000)/100;
     }
 
     function toReach(s,tgt){
       let wa=0,wt=0;
-      if(n(s.La)&&n(s.Lt)){wa+=n(s.La)*W2.L;wt+=n(s.Lt)*W2.L;}
-      if(n(s.Pa)&&n(s.Pt)){wa+=n(s.Pa)*W2.P;wt+=n(s.Pt)*W2.P;}
-      if(n(s.Ta)&&n(s.Tt)){wa+=n(s.Ta)*W2.T;wt+=n(s.Tt)*W2.T;}
-      if(n(s.Sa)&&n(s.St)){wa+=n(s.Sa)*W2.S;wt+=n(s.St)*W2.S;}
+      if(has(s.Lt)&&has(s.La)){wa+=n(s.La)*W2.L;wt+=n(s.Lt)*W2.L;}
+      if(has(s.Pt)&&has(s.Pa)){wa+=n(s.Pa)*W2.P;wt+=n(s.Pt)*W2.P;}
+      if(has(s.Tt)&&has(s.Ta)){wa+=n(s.Ta)*W2.T;wt+=n(s.Tt)*W2.T;}
+      if(has(s.St)&&has(s.Sa)){wa+=n(s.Sa)*W2.S;wt+=n(s.St)*W2.S;}
       if(wt===0) return null;
       let count=0;
       while((wa/wt)*100<tgt&&count<500){wa+=W2.L;wt+=W2.L;count++;}
@@ -1106,10 +1107,10 @@
 
     function canBunk(s,tgt){
       let wa=0,wt=0;
-      if(n(s.La)&&n(s.Lt)){wa+=n(s.La)*W2.L;wt+=n(s.Lt)*W2.L;}
-      if(n(s.Pa)&&n(s.Pt)){wa+=n(s.Pa)*W2.P;wt+=n(s.Pt)*W2.P;}
-      if(n(s.Ta)&&n(s.Tt)){wa+=n(s.Ta)*W2.T;wt+=n(s.Tt)*W2.T;}
-      if(n(s.Sa)&&n(s.St)){wa+=n(s.Sa)*W2.S;wt+=n(s.St)*W2.S;}
+      if(has(s.Lt)&&has(s.La)){wa+=n(s.La)*W2.L;wt+=n(s.Lt)*W2.L;}
+      if(has(s.Pt)&&has(s.Pa)){wa+=n(s.Pa)*W2.P;wt+=n(s.Pt)*W2.P;}
+      if(has(s.Tt)&&has(s.Ta)){wa+=n(s.Ta)*W2.T;wt+=n(s.Tt)*W2.T;}
+      if(has(s.St)&&has(s.Sa)){wa+=n(s.Sa)*W2.S;wt+=n(s.St)*W2.S;}
       if(wt===0) return 0;
       let count=0;
       while((wa/(wt+W2.L))*100>=tgt&&count<500){wt+=W2.L;count++;}
@@ -1119,16 +1120,16 @@
     // Returns how many of each component needed to reach target
     function toReachPerComp(s, tgt){
       let wa=0, wt=0;
-      if(n(s.La)&&n(s.Lt)){wa+=n(s.La)*W2.L;wt+=n(s.Lt)*W2.L;}
-      if(n(s.Pa)&&n(s.Pt)){wa+=n(s.Pa)*W2.P;wt+=n(s.Pt)*W2.P;}
-      if(n(s.Ta)&&n(s.Tt)){wa+=n(s.Ta)*W2.T;wt+=n(s.Tt)*W2.T;}
-      if(n(s.Sa)&&n(s.St)){wa+=n(s.Sa)*W2.S;wt+=n(s.St)*W2.S;}
+      if(has(s.Lt)&&has(s.La)){wa+=n(s.La)*W2.L;wt+=n(s.Lt)*W2.L;}
+      if(has(s.Pt)&&has(s.Pa)){wa+=n(s.Pa)*W2.P;wt+=n(s.Pt)*W2.P;}
+      if(has(s.Tt)&&has(s.Ta)){wa+=n(s.Ta)*W2.T;wt+=n(s.Tt)*W2.T;}
+      if(has(s.St)&&has(s.Sa)){wa+=n(s.Sa)*W2.S;wt+=n(s.St)*W2.S;}
       if(wt===0) return [];
       const compsActive=[
-        {label:'Lecture',   w:W2.L, active:n(s.La)&&n(s.Lt)},
-        {label:'Practical', w:W2.P, active:n(s.Pa)&&n(s.Pt)},
-        {label:'Tutorial',  w:W2.T, active:n(s.Ta)&&n(s.Tt)},
-        {label:'Skill',     w:W2.S, active:n(s.Sa)&&n(s.St)},
+        {label:'Lecture',   w:W2.L, active:has(s.Lt)&&has(s.La)},
+        {label:'Practical', w:W2.P, active:has(s.Pt)&&has(s.Pa)},
+        {label:'Tutorial',  w:W2.T, active:has(s.Tt)&&has(s.Ta)},
+        {label:'Skill',     w:W2.S, active:has(s.St)&&has(s.Sa)},
       ].filter(c=>c.active);
       // Calculate per component assuming only that component's classes are attended
       return compsActive.map(c=>{
@@ -1142,17 +1143,17 @@
     function canBunkPerComp(s, tgt){
       // Get total weighted attended and total first
       let wa=0, wt=0;
-      if(n(s.La)&&n(s.Lt)){wa+=n(s.La)*W2.L;wt+=n(s.Lt)*W2.L;}
-      if(n(s.Pa)&&n(s.Pt)){wa+=n(s.Pa)*W2.P;wt+=n(s.Pt)*W2.P;}
-      if(n(s.Ta)&&n(s.Tt)){wa+=n(s.Ta)*W2.T;wt+=n(s.Tt)*W2.T;}
-      if(n(s.Sa)&&n(s.St)){wa+=n(s.Sa)*W2.S;wt+=n(s.St)*W2.S;}
+      if(has(s.Lt)&&has(s.La)){wa+=n(s.La)*W2.L;wt+=n(s.Lt)*W2.L;}
+      if(has(s.Pt)&&has(s.Pa)){wa+=n(s.Pa)*W2.P;wt+=n(s.Pt)*W2.P;}
+      if(has(s.Tt)&&has(s.Ta)){wa+=n(s.Ta)*W2.T;wt+=n(s.Tt)*W2.T;}
+      if(has(s.St)&&has(s.Sa)){wa+=n(s.Sa)*W2.S;wt+=n(s.St)*W2.S;}
       if(wt===0) return [];
 
       const compsActive=[
-        {label:'Lecture',   w:W2.L, active:n(s.La)&&n(s.Lt)},
-        {label:'Practical', w:W2.P, active:n(s.Pa)&&n(s.Pt)},
-        {label:'Tutorial',  w:W2.T, active:n(s.Ta)&&n(s.Tt)},
-        {label:'Skill',     w:W2.S, active:n(s.Sa)&&n(s.St)},
+        {label:'Lecture',   w:W2.L, active:has(s.Lt)&&has(s.La)},
+        {label:'Practical', w:W2.P, active:has(s.Pt)&&has(s.Pa)},
+        {label:'Tutorial',  w:W2.T, active:has(s.Tt)&&has(s.Ta)},
+        {label:'Skill',     w:W2.S, active:has(s.St)&&has(s.Sa)},
       ].filter(c=>c.active);
 
       return compsActive.map(c=>{
@@ -1166,9 +1167,10 @@
     function cls(p){return p===null?'none':p>=75?'safe':p>=65?'warn':'dng';}
 
     function indivPct(a,t){
-      const av=n(a),tv=n(t);
-      if(!av||!tv) return null;
-      return Math.round(av/tv*100)+'%';
+      if(!has(t)||!has(a)) return null;
+      const tv=n(t);
+      if(!tv) return null;
+      return Math.round(n(a)/tv*100)+'%';
     }
 
     function cardHTML(s,delay){
@@ -1324,8 +1326,8 @@
     function calculateAll(){
       if(!subs.length){toast('Add at least one subject first.');return;}
       const hasAny=subs.some(s=>
-        (n(s.La)&&n(s.Lt))||(n(s.Pa)&&n(s.Pt))||
-        (n(s.Ta)&&n(s.Tt))||(n(s.Sa)&&n(s.St))
+        (has(s.Lt)&&has(s.La))||(has(s.Pt)&&has(s.Pa))||
+        (has(s.Tt)&&has(s.Ta))||(has(s.St)&&has(s.Sa))
       );
       if(!hasAny){toast('Fill in some values first.');return;}
 
