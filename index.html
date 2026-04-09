@@ -1073,10 +1073,11 @@
       const id=++uid;
       const base={id,name:d?.name??'Subject '+id,La:'',Lt:'',Pa:'',Pt:'',Ta:'',Tt:'',Sa:'',St:'',fromERP:false};
       if(d){
-        if(d.L){base.La=d.L[0]!==undefined&&d.L[0]!==null?d.L[0]:'';base.Lt=d.L[1]||'';}
-        if(d.P){base.Pa=d.P[0]!==undefined&&d.P[0]!==null?d.P[0]:'';base.Pt=d.P[1]||'';}
-        if(d.T){base.Ta=d.T[0]!==undefined&&d.T[0]!==null?d.T[0]:'';base.Tt=d.T[1]||'';}
-        if(d.S){base.Sa=d.S[0]!==undefined&&d.S[0]!==null?d.S[0]:'';base.St=d.S[1]||'';}
+        // Only fill component if conducted > 0
+        if(d.L&&d.L[1]>0){base.La=d.L[0]!==undefined&&d.L[0]!==null?d.L[0]:'';base.Lt=d.L[1];}
+        if(d.P&&d.P[1]>0){base.Pa=d.P[0]!==undefined&&d.P[0]!==null?d.P[0]:'';base.Pt=d.P[1];}
+        if(d.T&&d.T[1]>0){base.Ta=d.T[0]!==undefined&&d.T[0]!==null?d.T[0]:'';base.Tt=d.T[1];}
+        if(d.S&&d.S[1]>0){base.Sa=d.S[0]!==undefined&&d.S[0]!==null?d.S[0]:'';base.St=d.S[1];}
       }
       return base;
     }
