@@ -789,97 +789,117 @@
 
     <!-- INSTALL -->
     <div class="install-sec" id="install">
-      <div class="sec-title">Install Chrome Extension</div>
+      <div class="sec-title">Chrome Extension</div>
       <div class="ext-badge">
         <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="currentColor" stroke-width="1"/><path d="M3 5l1.5 1.5 2.5-2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Free · No login · No passwords stored
+        Now live on Chrome Web Store · Free · No login · No passwords stored
       </div>
       <p style="font-size:13px;color:var(--txt2);margin-bottom:6px;line-height:1.6;">
-        Our Chrome extension reads your ERP attendance page and fills all subjects into the calculator automatically. One click — done.
+        Our Chrome extension reads your ERP attendance page and fills all subjects into the calculator automatically. One click — done. <strong style="color:var(--txt)">Only works on laptop/PC.</strong>
       </p>
 
-      <!-- DOWNLOAD BUTTON -->
+      <!-- CHROME STORE BUTTON -->
       <div style="display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:18px 0;">
-        <a href="https://github.com/uv-xii/K-L-Attendance-Calculator/raw/main/kl-extension.zip"
-          download="kl-extension.zip"
-          class="download-btn"
-          onclick="showChromeStoreNotice()">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M8 2v8M5 7l3 3 3-3M2 11v2a1 1 0 001 1h10a1 1 0 001-1v-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          Download Extension
+        <a href="https://chromewebstore.google.com/detail/fogkdclfljcnkncahbekjbhdngjmbbbg"
+          target="_blank" rel="noopener"
+          class="download-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z" opacity="0"/><circle cx="12" cy="12" r="4" fill="white"/><path d="M12 2C6.48 2 2 6.48 2 12h4c0-3.31 2.69-6 6-6V2z" fill="white" opacity="0.8"/><path d="M20 12c0 3.31-2.69 6-6 6l2 3.46C19.07 19.78 22 16.22 22 12h-2z" fill="white" opacity="0.6"/><path d="M8 17.46L10 14c-1.66-.95-2.79-2.7-2.79-4.71 0-.1 0-.19.01-.29H4C4.04 12.53 5.6 15.7 8 17.46z" fill="white" opacity="0.4"/></svg>
+          Add to Chrome — It's Free
         </a>
         <span class="ext-note">
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1"/><path d="M6 4v3M6 8.5v.3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-          Works on Chrome &amp; Edge
+          Works on Chrome &amp; Edge (Laptop/PC only)
         </span>
       </div>
 
-      <!-- CHROME STORE NOTICE -->
-      <div id="chromeStoreNotice" style="background:linear-gradient(135deg,rgba(91,82,255,0.1),rgba(54,214,138,0.06));border:1px solid rgba(91,82,255,0.25);border-radius:12px;padding:14px 16px;margin-bottom:16px;">
-        <div style="display:flex;align-items:flex-start;gap:10px;">
-          <span style="font-size:20px;flex-shrink:0;">🎉</span>
-          <div>
-            <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px;">Coming to Chrome Web Store next week!</div>
-            <div style="font-size:12px;color:var(--txt2);line-height:1.6;">For now, install manually using the zip below. Once it's on the Chrome Web Store you'll be able to install it in one click — no zip needed. We'll update this page when it's live!</div>
-          </div>
-        </div>
-      </div>
+      <!-- TWO COLUMN LAYOUT: PC steps + Mobile steps -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:8px;">
 
-      <!-- INSTALL STEPS -->
-      <div style="font-size:12px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;">Installation steps</div>
-      <div class="install-list">
-        <div class="i-step">
-          <div class="i-num">1</div>
-          <div>
-            <div class="i-title">Download &amp; unzip</div>
-            <div class="i-desc">Click the Download button above. Once downloaded, right-click the zip → <strong>Extract All</strong> → extract to a folder you'll remember.</div>
+        <!-- PC / LAPTOP STEPS -->
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="2" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 14h6M8 12v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            <span style="font-size:12px;font-weight:700;color:var(--txt);text-transform:uppercase;letter-spacing:0.08em;">Laptop / PC</span>
+          </div>
+          <div class="install-list">
+            <div class="i-step">
+              <div class="i-num">1</div>
+              <div>
+                <div class="i-title">Install the extension</div>
+                <div class="i-desc">Click <strong>Add to Chrome</strong> above → click <strong>Add extension</strong> in the popup.</div>
+              </div>
+            </div>
+            <div class="i-step">
+              <div class="i-num">2</div>
+              <div>
+                <div class="i-title">Pin it to toolbar</div>
+                <div class="i-desc">Click the puzzle piece 🧩 icon in Chrome toolbar → pin <strong>KLU Attendance Calculator</strong>.</div>
+              </div>
+            </div>
+            <div class="i-step">
+              <div class="i-num">3</div>
+              <div>
+                <div class="i-title">Open ERP &amp; search</div>
+                <div class="i-desc">Go to <code>newerp.kluniversity.in</code> → log in → <strong>Attendance Register</strong> → select year &amp; semester → press <strong>Search</strong>.</div>
+              </div>
+            </div>
+            <div class="i-step">
+              <div class="i-num">4</div>
+              <div>
+                <div class="i-title">Sync to calculator ⚡</div>
+                <div class="i-desc">Click the extension icon in toolbar → subjects appear → click <strong>Send to Calculator</strong> → all subjects auto-fill instantly!</div>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="i-step">
-          <div class="i-num">2</div>
-          <div>
-            <div class="i-title">Open Chrome Extensions</div>
-            <div class="i-desc">In Chrome, type <code>chrome://extensions</code> in the address bar and press Enter.</div>
+
+        <!-- MOBILE STEPS -->
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="4" y="1" width="8" height="14" rx="2" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="12.5" r="0.8" fill="currentColor"/></svg>
+            <span style="font-size:12px;font-weight:700;color:var(--txt);text-transform:uppercase;letter-spacing:0.08em;">Mobile / Phone</span>
+          </div>
+          <div class="install-list">
+            <div class="i-step">
+              <div class="i-num">1</div>
+              <div>
+                <div class="i-title">Open the calculator</div>
+                <div class="i-desc">Visit <code>klu-attendance.in</code> on your phone browser.</div>
+              </div>
+            </div>
+            <div class="i-step">
+              <div class="i-num">2</div>
+              <div>
+                <div class="i-title">Add your subjects</div>
+                <div class="i-desc">Tap <strong>Add Subject</strong> → rename it to your subject name (e.g. Maths, DSA).</div>
+              </div>
+            </div>
+            <div class="i-step">
+              <div class="i-num">3</div>
+              <div>
+                <div class="i-title">Enter your classes</div>
+                <div class="i-desc">Open your KLU ERP → Attendance Register → enter <strong>Total Conducted</strong> and <strong>Total Attended</strong> for each component.</div>
+              </div>
+            </div>
+            <div class="i-step">
+              <div class="i-num">4</div>
+              <div>
+                <div class="i-title">Calculate ⚡</div>
+                <div class="i-desc">Tap <strong>Calculate Attendance</strong> — see your percentage, bunk count and shortage instantly. Data saves automatically for next time!</div>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="i-step">
-          <div class="i-num">3</div>
-          <div>
-            <div class="i-title">Turn on Developer Mode</div>
-            <div class="i-desc">Toggle <strong>Developer mode</strong> on — it's in the top right corner of the Extensions page.</div>
-          </div>
-        </div>
-        <div class="i-step">
-          <div class="i-num">4</div>
-          <div>
-            <div class="i-title">Load the extension</div>
-            <div class="i-desc">Click <strong>Load unpacked</strong> → navigate into the unzipped folder → select the <strong>inner</strong> <code>kl-extension</code> folder that contains <code>manifest.json</code> → click Select Folder.</div>
-          </div>
-        </div>
-        <div class="i-step">
-          <div class="i-num">5</div>
-          <div>
-            <div class="i-title">Open ERP &amp; search</div>
-            <div class="i-desc">Go to <code>newerp.kluniversity.in</code> → log in → click <strong>Attendance Register</strong> → select year &amp; semester → press <strong>Search</strong>.</div>
-          </div>
-        </div>
-        <div class="i-step">
-          <div class="i-num">6</div>
-          <div>
-            <div class="i-title">Sync to calculator ⚡</div>
-            <div class="i-desc">Click the extension icon in your Chrome toolbar → your subjects appear → click <strong>Send to Calculator</strong> → done! All subjects auto-fill instantly.</div>
-          </div>
-        </div>
+
       </div>
 
       <!-- TROUBLESHOOT -->
-      <div style="background:var(--s2);border-radius:10px;padding:14px 16px;margin-top:16px;">
+      <div style="background:var(--s2);border-radius:10px;padding:14px 16px;margin-top:20px;">
         <div style="font-size:12px;font-weight:600;color:var(--txt2);margin-bottom:8px;">⚠ Common issues</div>
         <div style="font-size:12px;color:var(--txt2);line-height:1.8;">
           <strong style="color:var(--txt)">No data found?</strong> Make sure you pressed Search on the ERP page first.<br>
-          <strong style="color:var(--txt)">Wrong folder selected?</strong> Select the inner folder that has <code>manifest.json</code> inside it.<br>
-          <strong style="color:var(--txt)">Extension not showing?</strong> Click the puzzle piece 🧩 icon in Chrome toolbar to pin it.
+          <strong style="color:var(--txt)">Extension not showing?</strong> Click the puzzle piece 🧩 icon in Chrome toolbar to pin it.<br>
+          <strong style="color:var(--txt)">On mobile?</strong> Chrome extensions don't work on phones — use manual entry above.
         </div>
       </div>
     </div>
