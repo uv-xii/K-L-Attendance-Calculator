@@ -287,9 +287,10 @@
     /* result pill */
     .pill{
       display:inline-flex;align-items:center;border-radius:100px;
-      padding:4px 14px;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;
+      padding:4px 14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      font-size:16px;font-weight:600;
       border:1px solid transparent;white-space:nowrap;
-      transition:all 0.3s;
+      transition:all 0.3s;font-variant-numeric:tabular-nums;
     }
     .pill.safe{background:rgba(54,214,138,0.12);border-color:rgba(54,214,138,0.3);color:var(--safe);}
     .pill.warn{background:rgba(245,158,11,0.12);border-color:rgba(245,158,11,0.3);color:var(--warn);}
@@ -326,9 +327,10 @@
     .inp-lbl{font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;}
     .num-inp{
       background:var(--s2);border:1px solid var(--bd);border-radius:8px;
-      padding:7px 8px;color:var(--txt);font-family:'DM Sans',sans-serif;
-      font-size:16px;font-weight:600;width:100%;outline:none;
+      padding:7px 8px;color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      font-size:16px;font-weight:500;width:100%;outline:none;
       transition:border-color 0.2s,background 0.2s,transform 0.1s;
+      font-variant-numeric:tabular-nums;
     }
     .num-inp:focus{border-color:var(--acc);background:var(--s3);transform:scale(1.02);}
     .num-inp::-webkit-inner-spin-button{-webkit-appearance:none;}
@@ -635,6 +637,11 @@
       border:2px solid rgba(255,69,96,0.35);
       color:#ff4560;
     }
+    .motive-msg.warn{
+      background:rgba(245,158,11,0.15);
+      border:2px solid rgba(245,158,11,0.45);
+      color:#f59e0b;
+    }
     .motive-tap{
       font-size:12px;font-weight:500;
       color:rgba(255,255,255,0.4);
@@ -740,8 +747,8 @@
       <div class="target-wrap">
         <span class="target-lbl">Target:</span>
         <div class="target-btns" id="tbtns">
-          <button class="tbtn on" onclick="setTarget(75,this)">75%</button>
-          <button class="tbtn" onclick="setTarget(85,this)">85%</button>
+          <button class="tbtn" onclick="setTarget(75,this)">75%</button>
+          <button class="tbtn on" onclick="setTarget(85,this)">85%</button>
         </div>
       </div>
       <button class="btn-calculate" onclick="calculateAll()">
@@ -1083,12 +1090,12 @@
     const W2={L:100,P:50,T:100,S:25};
     const COMPS=[
       {k:'L',label:'Lecture',  col:'#5b52ff'},
-      {k:'P',label:'Practical',col:'#ff5c7d'},
+      {k:'P',label:'Practical',col:'#EF4444'},
       {k:'T',label:'Tutorial', col:'#f59e0b'},
       {k:'S',label:'Skill',    col:'#36d68a'},
     ];
 
-    let subs=[], uid=0, target=75, calculated=false;
+    let subs=[], uid=0, target=85, calculated=false;
 
     function mk(d){
       const id=++uid;
@@ -1153,12 +1160,11 @@
         {label:'Tutorial',  w:W2.T, active:has(s.Tt)&&has(s.Ta)},
         {label:'Skill',     w:W2.S, active:has(s.St)&&has(s.Sa)},
       ].filter(c=>c.active);
-      // Calculate per component assuming only that component's classes are attended
       return compsActive.map(c=>{
         let twa=wa, twt=wt, count=0;
         while((twa/twt)*100<tgt && count<500){twa+=c.w;twt+=c.w;count++;}
         return {label:c.label, count};
-      });
+      }).sort((a,b)=>a.count-b.count);
     }
 
     // Returns per-component bunk breakdown as an array of {label, count}
@@ -1186,7 +1192,7 @@
       }).filter(c=>c.count>0);
     }
 
-    function cls(p){return p===null?'none':p>=75?'safe':p>=65?'warn':'dng';}
+    function cls(p){return p===null?'none':p>=target?'safe':p>=(target-10)?'warn':'dng';}
 
     function indivPct(a,t){
       if(!has(t)||!has(a)) return null;
@@ -1231,8 +1237,8 @@
         const b=canBunk(s,target);
         const r=toReach(s,target);
 
-        if(p>85){
-          // 🟢 ABOVE 85% — Excellent
+        if(p>=target){
+          // 🟢 ABOVE OR AT TARGET — Excellent
           insight=`<div class="insight safe">
             <div class="insight-icon-wrap">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 8l2.5 2.5 4.5-4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -1248,19 +1254,20 @@
             </div>
           </div>`;
         } else if(p>=75){
-          // 🟡 BETWEEN 75–85% — Safe but tight
-          insight=`<div class="insight safe">
+          // 🟡 ABOVE 75% BUT BELOW TARGET — Below target warning
+          insight=`<div class="insight warn">
             <div class="insight-icon-wrap">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 8l2.5 2.5 4.5-4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2L1.5 13h13L8 2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 7v3M8 11.5v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
             </div>
             <div class="insight-body">
-              <div class="insight-title">Safe at ${p}% — ${p>=target?'above target but room to improve':'below your target of '+target+'%'}</div>
+              <div class="insight-title">Below target — you're at ${p}% but need ${target}% ⚠️</div>
               <div class="insight-sub">${(()=>{
-              const bp=canBunkPerComp(s,target);
-              if(p<target) return 'You are below your '+target+'% target — attend more classes to reach it';
-              if(bp.length===0) return 'You are right at '+target+'% — attend every class to stay safe';
-              const best=bp.reduce((a,c)=>c.count>a.count?c:a,bp[0]);
-              return 'You can bunk '+b+' more class'+(b>1?'es':'')+' and stay above '+target+'% — most room in '+best.label+' ('+best.count+' class'+(best.count>1?'es':'')+')';
+              const r=toReach(s,target);
+              const rp=toReachPerComp(s,target);
+              if(!r||r===0) return 'You are right at your target — keep attending!';
+              if(!rp.length) return 'Attend '+r+' more class'+(r>1?'es':'')+' to reach '+target+'%';
+              const easiest=rp.reduce((a,c)=>c.count<a.count?c:a,rp[0]);
+              return 'Need '+r+' more class'+(r>1?'es':'')+' to reach '+target+'% — easiest via '+easiest.label+' ('+easiest.count+' class'+(easiest.count>1?'es':'')+')';
             })()}</div>
             </div>
           </div>`;
@@ -1573,13 +1580,12 @@
       return pts;
     }
 
-    function drawAwesomeText(ctx, W, H){
-      ctx.fillStyle = '#fff';
+    function drawEmoji(ctx, W, H, emoji){
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      const fs = Math.min(W*0.18, 160);
-      ctx.font = `900 ${fs}px Syne, sans-serif`;
-      ctx.fillText('AWESOME', W/2, H/2);
+      const fs = Math.min(W, H) * 0.38;
+      ctx.font = `${fs}px serif`;
+      ctx.fillText(emoji, W/2, H/2);
     }
 
     function drawSkullShape(ctx, W, H){
@@ -1589,7 +1595,6 @@
       ctx.translate(cx, cy);
       ctx.scale(sc, sc);
       ctx.fillStyle = '#fff';
-      // skull dome
       ctx.beginPath();
       ctx.arc(0,-20,80,Math.PI,0);
       ctx.bezierCurveTo(80,20,60,70,30,80);
@@ -1597,18 +1602,12 @@
       ctx.lineTo(-30,80);
       ctx.bezierCurveTo(-60,70,-80,20,-80,20);
       ctx.closePath(); ctx.fill();
-      // jaw
       ctx.fillRect(-30,90,60,30);
-      // eye sockets (cut out)
       ctx.globalCompositeOperation='destination-out';
       ctx.beginPath(); ctx.ellipse(-28,-30,22,24,0,0,Math.PI*2); ctx.fill();
       ctx.beginPath(); ctx.ellipse(28,-30,22,24,0,0,Math.PI*2); ctx.fill();
-      // nose
       ctx.beginPath(); ctx.ellipse(0,10,12,14,0,0,Math.PI*2); ctx.fill();
-      // teeth
-      for(let i=-2;i<=2;i++){
-        ctx.fillRect(i*20-8,98,14,20);
-      }
+      for(let i=-2;i<=2;i++) ctx.fillRect(i*20-8,98,14,20);
       ctx.globalCompositeOperation='source-over';
       ctx.restore();
     }
@@ -1616,8 +1615,12 @@
     function launchSmoke(mode){
       smokeMode = mode;
       smokeParticles = [];
-      const col = mode==='awesome' ? 'rgba(54,214,138,A)' : 'rgba(255,69,96,A)';
-      const drawFn = mode==='awesome' ? drawAwesomeText : drawSkullShape;
+      const col = mode==='awesome' ? 'rgba(54,214,138,A)' : mode==='warn' ? 'rgba(245,158,11,A)' : 'rgba(255,69,96,A)';
+      const drawFn = mode==='awesome'
+        ? (ctx,W,H) => drawEmoji(ctx,W,H,'😎')
+        : mode==='warn'
+        ? (ctx,W,H) => drawEmoji(ctx,W,H,'👍')
+        : drawSkullShape;
       const pts = getPixelPoints(drawFn, 6);
 
       // Burst particles from shape pixels
@@ -1666,9 +1669,10 @@
     function checkMotivation(){
       const results = subs.map(s=>calcSub(s)).filter(p=>p!==null);
       if(!results.length) return;
-      const allAbove85 = results.every(p=>p>=85);
-      const anyBelow75 = results.some(p=>p<75);
-      if(allAbove85){
+      const allAboveTarget = results.every(p=>p>=target);
+      const anyBelowTarget = results.some(p=>p<target);
+      const anyBetween75AndTarget = results.some(p=>p>=75 && p<target) && !results.some(p=>p<75);
+      if(allAboveTarget){
         const msgs = [
           "You're an attendance legend! 🎓",
           "Professors actually know your name 😎",
@@ -1677,7 +1681,16 @@
           "Built different. Respect. 💪"
         ];
         showMotivation('awesome', msgs[Math.floor(Math.random()*msgs.length)]);
-      } else if(anyBelow75){
+      } else if(anyBetween75AndTarget){
+        const msgs = [
+          "You're close! Just a few more classes to hit "+target+"% 💪",
+          "Almost there! Don't stop now 🔥",
+          "So close to "+target+"% — grind mode activated 📚",
+          "You can make it to "+target+"% — just show up! 🎯",
+          ""+target+"% is right around the corner — push through! ⚡"
+        ];
+        showMotivation('warn', msgs[Math.floor(Math.random()*msgs.length)]);
+      } else if(anyBelowTarget){
         const msgs = [
           "Bro go to class before it's too late 💀",
           "Your attendance is scarier than your exams 💀",
