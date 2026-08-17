@@ -345,6 +345,11 @@
     }
     .num-inp:focus{border-color:var(--acc);background:var(--s3);transform:scale(1.02);}
     .num-inp::-webkit-inner-spin-button{-webkit-appearance:none;}
+    .num-inp::-webkit-outer-spin-button{-webkit-appearance:none;}
+    .num-inp{-moz-appearance:textfield;}
+    .tcbr-inp::-webkit-inner-spin-button{-webkit-appearance:none;}
+    .tcbr-inp::-webkit-outer-spin-button{-webkit-appearance:none;}
+    .tcbr-inp{-moz-appearance:textfield;}
     .num-inp::placeholder{color:var(--txt3);font-weight:400;font-size:13px;}
     .num-inp.err{border-color:var(--danger)!important;background:rgba(255,69,96,0.08)!important;color:var(--danger);}
     @keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
@@ -577,6 +582,43 @@
       .comp-row{grid-template-columns:80px 1fr 1fr 40px;}
     }
 
+    /* ── TCBR SECTION ── */
+    .tcbr-wrap{padding:10px 16px 14px;border-top:1px solid var(--bd);}
+    .tcbr-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+    .tcbr-label{font-size:12px;font-weight:700;color:#a09bff;text-transform:uppercase;letter-spacing:0.08em;display:flex;align-items:center;gap:6px;}
+    .tcbr-add{
+      display:inline-flex;align-items:center;gap:4px;
+      background:rgba(91,82,255,0.15);border:1px solid rgba(91,82,255,0.3);
+      border-radius:100px;padding:4px 10px;font-size:11px;font-weight:700;
+      color:#a09bff;cursor:pointer;transition:all 0.2s;
+    }
+    .tcbr-add:hover{background:rgba(91,82,255,0.28);}
+    .tcbr-row{
+      display:grid;grid-template-columns:80px 1fr 1fr 28px;
+      gap:6px;align-items:center;margin-bottom:7px;
+    }
+    .tcbr-select{
+      background:var(--s2);border:1.5px solid var(--bd2);border-radius:8px;
+      padding:7px 8px;color:#a09bff;font-family:'DM Sans',sans-serif;
+      font-size:13px;font-weight:700;outline:none;cursor:pointer;
+      transition:border-color 0.2s;
+    }
+    .tcbr-select:focus{border-color:#6c63ff;}
+    .tcbr-inp{
+      background:var(--s2);border:1.5px solid var(--bd2);border-radius:8px;
+      padding:7px 8px;color:#fff;font-family:'DM Sans',sans-serif;
+      font-size:15px;font-weight:600;width:100%;outline:none;
+      transition:border-color 0.2s;
+    }
+    .tcbr-inp:focus{border-color:#6c63ff;}
+    .tcbr-inp::placeholder{color:#546080;font-weight:400;font-size:13px;}
+    .tcbr-rm{
+      background:none;border:none;color:#3d4761;cursor:pointer;
+      font-size:16px;padding:0;transition:color 0.2s;line-height:1;
+    }
+    .tcbr-rm:hover{color:#ff4560;}
+
+    /* ── PAGE LOADER ── */
     /* ── PAGE LOADER ── */
     #pageLoader{
       position:fixed;inset:0;z-index:9999;
@@ -1110,7 +1152,7 @@
 
     function mk(d){
       const id=++uid;
-      const base={id,name:d?.name??'Subject '+id,La:'',Lt:'',Pa:'',Pt:'',Ta:'',Tt:'',Sa:'',St:'',fromERP:false};
+      const base={id,name:d?.name??'Subject '+id,La:'',Lt:'',Pa:'',Pt:'',Ta:'',Tt:'',Sa:'',St:'',tcbr:[],fromERP:false};
       if(d){
         // Only fill component if conducted > 0
         if(d.L&&d.L[1]>0){base.La=d.L[0]!==undefined&&d.L[0]!==null?d.L[0]:'';base.Lt=d.L[1];}
@@ -1124,12 +1166,25 @@
     function n(x){return parseFloat(x)||0;}
     function has(x){return x!==''&&x!==null&&x!==undefined&&String(x).trim()!=='';}
 
+    function getTCBR(s, comp){
+      // Returns {a, t} total TCBR attended and conducted for a component
+      if(!s.tcbr||!s.tcbr.length) return {a:0,t:0};
+      return s.tcbr.filter(r=>r.comp===comp).reduce((acc,r)=>{
+        acc.a+=n(r.a); acc.t+=n(r.t); return acc;
+      },{a:0,t:0});
+    }
+
     function calcSub(s){
       let wa=0,wt=0;
-      if(has(s.Lt)&&has(s.La)){wa+=n(s.La)*W2.L;wt+=n(s.Lt)*W2.L;}
-      if(has(s.Pt)&&has(s.Pa)){wa+=n(s.Pa)*W2.P;wt+=n(s.Pt)*W2.P;}
-      if(has(s.Tt)&&has(s.Ta)){wa+=n(s.Ta)*W2.T;wt+=n(s.Tt)*W2.T;}
-      if(has(s.St)&&has(s.Sa)){wa+=n(s.Sa)*W2.S;wt+=n(s.St)*W2.S;}
+      const tL=getTCBR(s,'L'),tP=getTCBR(s,'P'),tT=getTCBR(s,'T'),tS=getTCBR(s,'S');
+      if(has(s.Lt)&&has(s.La)){wa+=(n(s.La)+tL.a)*W2.L;wt+=(n(s.Lt)+tL.t)*W2.L;}
+      else if(tL.t>0){wa+=tL.a*W2.L;wt+=tL.t*W2.L;}
+      if(has(s.Pt)&&has(s.Pa)){wa+=(n(s.Pa)+tP.a)*W2.P;wt+=(n(s.Pt)+tP.t)*W2.P;}
+      else if(tP.t>0){wa+=tP.a*W2.P;wt+=tP.t*W2.P;}
+      if(has(s.Tt)&&has(s.Ta)){wa+=(n(s.Ta)+tT.a)*W2.T;wt+=(n(s.Tt)+tT.t)*W2.T;}
+      else if(tT.t>0){wa+=tT.a*W2.T;wt+=tT.t*W2.T;}
+      if(has(s.St)&&has(s.Sa)){wa+=(n(s.Sa)+tS.a)*W2.S;wt+=(n(s.St)+tS.t)*W2.S;}
+      else if(tS.t>0){wa+=tS.a*W2.S;wt+=tS.t*W2.S;}
       return wt===0?null:Math.round(wa/wt*10000)/100;
     }
 
@@ -1317,6 +1372,37 @@
         }
       }
 
+      // TCBR rows HTML
+      const tcbrRows=(s.tcbr||[]).map((r,i)=>`
+        <div class="tcbr-row" id="tcbr-row-${s.id}-${i}">
+          <select class="tcbr-select" onchange="upTCBR(${s.id},${i},'comp',this.value)">
+            <option value="L" ${r.comp==='L'?'selected':''}>Lecture</option>
+            <option value="P" ${r.comp==='P'?'selected':''}>Practical</option>
+            <option value="T" ${r.comp==='T'?'selected':''}>Tutorial</option>
+            <option value="S" ${r.comp==='S'?'selected':''}>Skill</option>
+          </select>
+          <input class="tcbr-inp" type="number" min="0" placeholder="Conducted"
+            value="${r.t||''}" onchange="upTCBR(${s.id},${i},'t',this.value)"/>
+          <input class="tcbr-inp" type="number" min="0" placeholder="Attended"
+            value="${r.a||''}" onchange="upTCBR(${s.id},${i},'a',this.value)"/>
+          <button class="tcbr-rm" onclick="rmTCBR(${s.id},${i})" title="Remove">✕</button>
+        </div>`).join('');
+
+      const tcbrSection=`
+        <div class="tcbr-wrap">
+          <div class="tcbr-header">
+            <div class="tcbr-label">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.2"/><path d="M6 3v3l2 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+              TCBR
+            </div>
+            <button class="tcbr-add" onclick="addTCBR(${s.id})">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              Add
+            </button>
+          </div>
+          ${tcbrRows||'<div style="font-size:12px;color:#3d4761;">No TCBR — tap Add if applicable</div>'}
+        </div>`;
+
       const erpTag=s.fromERP?`<div style="display:inline-flex;align-items:center;gap:4px;background:rgba(91,82,255,0.15);border-radius:100px;padding:2px 9px;font-size:10px;color:#a09bff;font-weight:600;">⚡ ERP</div>`:'';
       const res=calculated
         ?`<div class="pill ${c}">${p!==null?p+'%':'—'}</div>`
@@ -1334,6 +1420,7 @@
         </div>
         <div class="prog"><div class="prog-fill ${c}" style="width:${pw}%"></div></div>
         <div class="comps">${rows}</div>
+        ${tcbrSection}
         ${insight}
       </div>`;
     }
@@ -1768,6 +1855,27 @@
     function showChromeStoreNotice(){
       const el = document.getElementById('chromeStoreNotice');
       if(el) { el.style.display='block'; el.scrollIntoView({behavior:'smooth', block:'nearest'}); }
+    }
+
+    // ── TCBR HELPERS ─────────────────────────────────
+    function addTCBR(id){
+      const s=subs.find(s=>s.id===id); if(!s) return;
+      if(!s.tcbr) s.tcbr=[];
+      s.tcbr.push({comp:'L',t:'',a:''});
+      if(calculated){calculated=false;setHint(false);}
+      render();
+    }
+    function rmTCBR(id,idx){
+      const s=subs.find(s=>s.id===id); if(!s||!s.tcbr) return;
+      s.tcbr.splice(idx,1);
+      if(calculated){calculated=false;setHint(false);}
+      render();
+    }
+    function upTCBR(id,idx,key,val){
+      const s=subs.find(s=>s.id===id); if(!s||!s.tcbr) return;
+      if(key==='comp') s.tcbr[idx].comp=val;
+      else s.tcbr[idx][key]=parseFloat(val)||'';
+      if(calculated){calculated=false;setHint(false);}
     }
 
     // ── FEEDBACK ──────────────────────────────────
