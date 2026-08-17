@@ -960,7 +960,7 @@
 
     <footer>
       Built for KL University students · Same formula as your ERP<br>
-      &copy; KL Attendance Calculator · Free to use
+      &copy; 2025 KL Attendance Calculator · Free to use
       <div class="foot-links">
         <button class="foot-share-btn" onclick="document.getElementById('shareModal').classList.add('open')" title="Share this site">
           <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
@@ -1397,6 +1397,7 @@
       render();
       setHint(true);
       toast('✓ Attendance calculated!');
+      saveToStorage();
       setTimeout(checkMotivation, 400);
     }
 
@@ -1431,8 +1432,8 @@
     function upV(id,k,v){
       const s=subs.find(s=>s.id===id);if(!s)return;
       s[k]=Math.max(0,parseFloat(v)||0)||'';
-      if(calculated){calculated=false;setHint(false);render();}
-      else saveToStorage();
+      if(calculated){calculated=false;setHint(false);}
+      // Don't save here — save only after Calculate is pressed
     }
 
     function clearAll(){
