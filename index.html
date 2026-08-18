@@ -1397,8 +1397,10 @@
               Add
             </button>
           </div>
-          ${(s.tcbr&&s.tcbr.length>0)?'<div style="font-size:11px;color:#6b7fa0;background:rgba(91,82,255,0.06);border:1px solid rgba(91,82,255,0.15);border-radius:8px;padding:8px 11px;margin-bottom:8px;line-height:1.6;">ℹ️ <strong style=\'color:#a09bff;\'>TCBR is situation based</strong> — only applies if the college registered you late. Check your ERP Tcbr column — if it shows 0, skip this.</div>':''}
-          ${tcbrRows||''}
+          <div class="tcbr-rows">
+            ${(s.tcbr&&s.tcbr.length>0)?'<div style="font-size:11px;color:#6b7fa0;background:rgba(91,82,255,0.06);border:1px solid rgba(91,82,255,0.15);border-radius:8px;padding:8px 11px;margin-bottom:8px;line-height:1.6;">ℹ️ <strong style=\'color:#a09bff;\'>TCBR is situation based</strong> — only applies if the college registered you late. Check your ERP Tcbr column — if it shows 0, skip this.</div>':''}
+            ${tcbrRows||''}
+          </div>
         </div>`;
 
       const erpTag=s.fromERP?`<div style="display:inline-flex;align-items:center;gap:4px;background:rgba(91,82,255,0.15);border-radius:100px;padding:2px 9px;font-size:10px;color:#a09bff;font-weight:600;">⚡ ERP</div>`:'';
@@ -1512,7 +1514,7 @@
       calculated=false;setHint(false);render();
     }
 
-    function upN(id,v){const s=subs.find(s=>s.id===id);if(s){s.name=v;saveToStorage();}}
+    function upN(id,v){const s=subs.find(s=>s.id===id);if(s){s.name=v;}}
 
     function upV(id,k,v){
       const s=subs.find(s=>s.id===id);if(!s)return;
@@ -1861,19 +1863,46 @@
       if(!s.tcbr) s.tcbr=[];
       s.tcbr.push({comp:'L',t:'',a:''});
       if(calculated){calculated=false;setHint(false);}
-      render();
+      // Re-render only the TCBR section of this card, not the whole page
+      renderTCBR(s);
     }
     function rmTCBR(id,idx){
       const s=subs.find(s=>s.id===id); if(!s||!s.tcbr) return;
       s.tcbr.splice(idx,1);
       if(calculated){calculated=false;setHint(false);}
-      render();
+      renderTCBR(s);
     }
     function upTCBR(id,idx,key,val){
       const s=subs.find(s=>s.id===id); if(!s||!s.tcbr) return;
       if(key==='comp') s.tcbr[idx].comp=val;
       else s.tcbr[idx][key]=parseFloat(val)||'';
       if(calculated){calculated=false;setHint(false);}
+      // No render — just update data
+    }
+
+    function renderTCBR(s){
+      const wrap = document.querySelector('#card-'+s.id+' .tcbr-rows');
+      if(!wrap) return;
+      const notice = s.tcbr&&s.tcbr.length>0
+        ? '<div style="font-size:11px;color:#6b7fa0;background:rgba(91,82,255,0.06);border:1px solid rgba(91,82,255,0.15);border-radius:8px;padding:8px 11px;margin-bottom:8px;line-height:1.6;">ℹ️ <strong style=\'color:#a09bff;\'>TCBR is situation based</strong> — only applies if the college registered you late. Check your ERP Tcbr column — if it shows 0, skip this.</div>'
+        : '';
+      const rows=(s.tcbr||[]).map((r,i)=>`
+        <div class="tcbr-row">
+          <select class="tcbr-select" onchange="upTCBR(${s.id},${i},'comp',this.value)">
+            <option value="L" ${r.comp==='L'?'selected':''}>Lecture</option>
+            <option value="P" ${r.comp==='P'?'selected':''}>Practical</option>
+            <option value="T" ${r.comp==='T'?'selected':''}>Tutorial</option>
+            <option value="S" ${r.comp==='S'?'selected':''}>Skill</option>
+          </select>
+          <input class="tcbr-inp" type="number" min="0" placeholder="Conducted"
+            value="${r.t||''}" onchange="upTCBR(${s.id},${i},'t',this.value)"
+            style="-moz-appearance:textfield;"/>
+          <input class="tcbr-inp" type="number" min="0" placeholder="Attended"
+            value="${r.a||''}" onchange="upTCBR(${s.id},${i},'a',this.value)"
+            style="-moz-appearance:textfield;"/>
+          <button class="tcbr-rm" onclick="rmTCBR(${s.id},${i})" title="Remove">✕</button>
+        </div>`).join('');
+      wrap.innerHTML = notice + rows;
     }
 
     // ── FEEDBACK ──────────────────────────────────
