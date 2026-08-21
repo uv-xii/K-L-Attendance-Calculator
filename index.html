@@ -1159,6 +1159,10 @@
         if(d.P&&d.P[1]>0){base.Pa=d.P[0]!==undefined&&d.P[0]!==null?d.P[0]:'';base.Pt=d.P[1];}
         if(d.T&&d.T[1]>0){base.Ta=d.T[0]!==undefined&&d.T[0]!==null?d.T[0]:'';base.Tt=d.T[1];}
         if(d.S&&d.S[1]>0){base.Sa=d.S[0]!==undefined&&d.S[0]!==null?d.S[0]:'';base.St=d.S[1];}
+        // Pass TCBR from extension if present and has valid data
+        if(Array.isArray(d.tcbr)&&d.tcbr.length>0){
+          base.tcbr=d.tcbr.filter(r=>r.t>0).map(r=>({comp:r.comp,t:r.t,a:r.a}));
+        }
       }
       return base;
     }
