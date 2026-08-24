@@ -78,10 +78,20 @@
     body.light{
       --bg:#f0f4ff; --s1:#ffffff; --s2:#e8edf8; --s3:#dde4f5;
       --bd:#c8d0e8; --bd2:#b0bbd8;
-      --txt:#0f1220; --txt2:#4a5270; --txt3:#8892b0;
+      --txt:#0a0e1a; --txt2:#3a4560; --txt3:#6b7a9a;
       --safe:#1a9e5c; --warn:#c47d00; --danger:#d63050;
       --acc:#4a42ee;
     }
+    /* Fix all white-forced text in light mode */
+    body.light .sub-inp{color:#0a0e1a !important;}
+    body.light .num-inp{color:#0a0e1a !important;}
+    body.light .tcbr-inp{color:#0a0e1a !important;}
+    body.light .comp-name{color:#0a0e1a !important;}
+    body.light .card-hd{color:#0a0e1a;}
+    body.light .insight-title{color:inherit;}
+    body.light .pill.none{color:#3a4560;}
+    body.light .tcbr-select{color:#3a4560 !important;background:#e8edf8 !important;}
+    body.light .tcbr-inp{color:#0a0e1a !important;background:#f8f9ff !important;}
     /* Light mode background — soft blue tint instead of dark */
     body.light #bgCanvas{opacity:1;}
     body.light::before{
@@ -93,7 +103,7 @@
     /* Light mode card adjustments */
     body.light .card{box-shadow:0 2px 12px rgba(0,0,0,0.06);}
     body.light .card:hover{box-shadow:0 6px 24px rgba(0,0,0,0.1);}
-    body.light .num-inp{background:#f8f9ff;border-color:#c8d0e8;}
+    body.light .num-inp{background:#f8f9ff;border-color:#c8d0e8;color:#0a0e1a !important;}
     body.light .num-inp:focus{border-color:var(--acc);background:#fff;}
     body.light .insight.safe{background:rgba(26,158,92,0.08);}
     body.light .insight.warn{background:rgba(196,125,0,0.08);}
@@ -111,7 +121,7 @@
     body.light .btn-add{background:rgba(74,66,238,0.08);border-color:rgba(74,66,238,0.2);color:#4a42ee;}
     body.light .nav-ext{background:rgba(74,66,238,0.08);border-color:rgba(74,66,238,0.2);color:#4a42ee;}
     body.light .logo{background:linear-gradient(135deg,#0f1220,#4a42ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-    body.light h1{background:linear-gradient(130deg,#0f1220 30%,#4a42ee 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    body.light h1{background:linear-gradient(130deg,#0a0e1a 30%,#4a42ee 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
     body.light .btn-calculate{color:#fff;}
     body.light .ext-banner{background:linear-gradient(135deg,rgba(74,66,238,0.08),rgba(26,158,92,0.05));}
     body.light .modal-box{background:#fff;border-color:#c8d0e8;}
@@ -287,7 +297,7 @@
     .card-hd-l{display:flex;align-items:center;gap:8px;flex:1;min-width:0;}
     .sub-inp{
       background:none;border:none;border-bottom:1px dashed var(--bd2);
-      padding-bottom:2px;color:#ffffff;font-family:'Syne',sans-serif;
+      padding-bottom:2px;color:var(--txt);font-family:'Syne',sans-serif;
       font-size:14px;font-weight:700;outline:none;flex:1;min-width:0;max-width:220px;
       transition:border-color 0.2s;
     }
@@ -338,7 +348,7 @@
     .inp-lbl{font-size:12px;color:var(--txt2);text-transform:uppercase;letter-spacing:0.08em;font-weight:700;}
     .num-inp{
       background:var(--s2);border:1px solid var(--bd);border-radius:8px;
-      padding:7px 8px;color:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      padding:7px 8px;color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
       font-size:18px;font-weight:600;width:100%;outline:none;
       transition:border-color 0.2s,background 0.2s,transform 0.1s;
       font-variant-numeric:tabular-nums;
@@ -594,19 +604,19 @@
     }
     .tcbr-add:hover{background:rgba(91,82,255,0.28);}
     .tcbr-row{
-      display:grid;grid-template-columns:80px 1fr 1fr 28px;
+      display:grid;grid-template-columns:100px 1fr 28px;
       gap:6px;align-items:center;margin-bottom:7px;
     }
     .tcbr-select{
       background:var(--s2);border:1.5px solid var(--bd2);border-radius:8px;
-      padding:7px 8px;color:#a09bff;font-family:'DM Sans',sans-serif;
+      padding:7px 8px;color:var(--acc);font-family:'DM Sans',sans-serif;
       font-size:13px;font-weight:700;outline:none;cursor:pointer;
       transition:border-color 0.2s;
     }
     .tcbr-select:focus{border-color:#6c63ff;}
     .tcbr-inp{
       background:var(--s2);border:1.5px solid var(--bd2);border-radius:8px;
-      padding:7px 8px;color:#fff;font-family:'DM Sans',sans-serif;
+      padding:7px 8px;color:var(--txt);font-family:'DM Sans',sans-serif;
       font-size:15px;font-weight:600;width:100%;outline:none;
       transition:border-color 0.2s;
     }
@@ -1161,7 +1171,7 @@
         if(d.S&&d.S[1]>0){base.Sa=d.S[0]!==undefined&&d.S[0]!==null?d.S[0]:'';base.St=d.S[1];}
         // Pass TCBR from extension if present and has valid data
         if(Array.isArray(d.tcbr)&&d.tcbr.length>0){
-          base.tcbr=d.tcbr.filter(r=>r.t>0).map(r=>({comp:r.comp,t:r.t,a:r.a}));
+          base.tcbr=d.tcbr.filter(r=>r.a>0).map(r=>({comp:r.comp,a:r.a}));
         }
       }
       return base;
@@ -1171,38 +1181,32 @@
     function has(x){return x!==''&&x!==null&&x!==undefined&&String(x).trim()!=='';}
 
     function getTCBR(s, comp){
-      // Returns {a, t} total TCBR attended and conducted for a component
-      if(!s.tcbr||!s.tcbr.length) return {a:0,t:0};
+      // TCBR only adds to attended, NOT conducted
+      if(!s.tcbr||!s.tcbr.length) return {a:0};
       return s.tcbr.filter(r=>r.comp===comp).reduce((acc,r)=>{
-        acc.a+=n(r.a); acc.t+=n(r.t); return acc;
-      },{a:0,t:0});
+        acc.a+=n(r.a); return acc;
+      },{a:0});
     }
 
     function calcSub(s){
       let wa=0,wt=0;
       const tL=getTCBR(s,'L'),tP=getTCBR(s,'P'),tT=getTCBR(s,'T'),tS=getTCBR(s,'S');
-      if(has(s.Lt)&&has(s.La)){wa+=(n(s.La)+tL.a)*W2.L;wt+=(n(s.Lt)+tL.t)*W2.L;}
-      else if(tL.t>0){wa+=tL.a*W2.L;wt+=tL.t*W2.L;}
-      if(has(s.Pt)&&has(s.Pa)){wa+=(n(s.Pa)+tP.a)*W2.P;wt+=(n(s.Pt)+tP.t)*W2.P;}
-      else if(tP.t>0){wa+=tP.a*W2.P;wt+=tP.t*W2.P;}
-      if(has(s.Tt)&&has(s.Ta)){wa+=(n(s.Ta)+tT.a)*W2.T;wt+=(n(s.Tt)+tT.t)*W2.T;}
-      else if(tT.t>0){wa+=tT.a*W2.T;wt+=tT.t*W2.T;}
-      if(has(s.St)&&has(s.Sa)){wa+=(n(s.Sa)+tS.a)*W2.S;wt+=(n(s.St)+tS.t)*W2.S;}
-      else if(tS.t>0){wa+=tS.a*W2.S;wt+=tS.t*W2.S;}
+      // TCBR only adds to attended — conducted stays the same
+      if(has(s.Lt)&&has(s.La)){wa+=(n(s.La)+tL.a)*W2.L;wt+=n(s.Lt)*W2.L;}
+      if(has(s.Pt)&&has(s.Pa)){wa+=(n(s.Pa)+tP.a)*W2.P;wt+=n(s.Pt)*W2.P;}
+      if(has(s.Tt)&&has(s.Ta)){wa+=(n(s.Ta)+tT.a)*W2.T;wt+=n(s.Tt)*W2.T;}
+      if(has(s.St)&&has(s.Sa)){wa+=(n(s.Sa)+tS.a)*W2.S;wt+=n(s.St)*W2.S;}
       return wt===0?null:Math.round(wa/wt*10000)/100;
     }
 
     function baseWaWt(s){
       const tL=getTCBR(s,'L'),tP=getTCBR(s,'P'),tT=getTCBR(s,'T'),tS=getTCBR(s,'S');
       let wa=0,wt=0;
-      if(has(s.Lt)&&has(s.La)){wa+=(n(s.La)+tL.a)*W2.L;wt+=(n(s.Lt)+tL.t)*W2.L;}
-      else if(tL.t>0){wa+=tL.a*W2.L;wt+=tL.t*W2.L;}
-      if(has(s.Pt)&&has(s.Pa)){wa+=(n(s.Pa)+tP.a)*W2.P;wt+=(n(s.Pt)+tP.t)*W2.P;}
-      else if(tP.t>0){wa+=tP.a*W2.P;wt+=tP.t*W2.P;}
-      if(has(s.Tt)&&has(s.Ta)){wa+=(n(s.Ta)+tT.a)*W2.T;wt+=(n(s.Tt)+tT.t)*W2.T;}
-      else if(tT.t>0){wa+=tT.a*W2.T;wt+=tT.t*W2.T;}
-      if(has(s.St)&&has(s.Sa)){wa+=(n(s.Sa)+tS.a)*W2.S;wt+=(n(s.St)+tS.t)*W2.S;}
-      else if(tS.t>0){wa+=tS.a*W2.S;wt+=tS.t*W2.S;}
+      // TCBR only adds to attended — conducted stays the same
+      if(has(s.Lt)&&has(s.La)){wa+=(n(s.La)+tL.a)*W2.L;wt+=n(s.Lt)*W2.L;}
+      if(has(s.Pt)&&has(s.Pa)){wa+=(n(s.Pa)+tP.a)*W2.P;wt+=n(s.Pt)*W2.P;}
+      if(has(s.Tt)&&has(s.Ta)){wa+=(n(s.Ta)+tT.a)*W2.T;wt+=n(s.Tt)*W2.T;}
+      if(has(s.St)&&has(s.Sa)){wa+=(n(s.Sa)+tS.a)*W2.S;wt+=n(s.St)*W2.S;}
       return {wa,wt};
     }
 
@@ -1382,9 +1386,7 @@
             <option value="T" ${r.comp==='T'?'selected':''}>Tutorial</option>
             <option value="S" ${r.comp==='S'?'selected':''}>Skill</option>
           </select>
-          <input class="tcbr-inp" type="number" min="0" placeholder="Conducted"
-            value="${r.t||''}" onchange="upTCBR(${s.id},${i},'t',this.value)"/>
-          <input class="tcbr-inp" type="number" min="0" placeholder="Attended"
+          <input class="tcbr-inp" type="number" min="0" placeholder="TCBR attended"
             value="${r.a||''}" onchange="upTCBR(${s.id},${i},'a',this.value)"/>
           <button class="tcbr-rm" onclick="rmTCBR(${s.id},${i})" title="Remove">✕</button>
         </div>`).join('');
@@ -1865,7 +1867,7 @@
     function addTCBR(id){
       const s=subs.find(s=>s.id===id); if(!s) return;
       if(!s.tcbr) s.tcbr=[];
-      s.tcbr.push({comp:'L',t:'',a:''});
+      s.tcbr.push({comp:'L',a:''});
       if(calculated){calculated=false;setHint(false);}
       // Re-render only the TCBR section of this card, not the whole page
       renderTCBR(s);
@@ -1879,9 +1881,8 @@
     function upTCBR(id,idx,key,val){
       const s=subs.find(s=>s.id===id); if(!s||!s.tcbr) return;
       if(key==='comp') s.tcbr[idx].comp=val;
-      else s.tcbr[idx][key]=parseFloat(val)||'';
+      else if(key==='a') s.tcbr[idx].a=parseFloat(val)||'';
       if(calculated){calculated=false;setHint(false);}
-      // No render — just update data
     }
 
     function renderTCBR(s){
@@ -1898,10 +1899,7 @@
             <option value="T" ${r.comp==='T'?'selected':''}>Tutorial</option>
             <option value="S" ${r.comp==='S'?'selected':''}>Skill</option>
           </select>
-          <input class="tcbr-inp" type="number" min="0" placeholder="Conducted"
-            value="${r.t||''}" onchange="upTCBR(${s.id},${i},'t',this.value)"
-            style="-moz-appearance:textfield;"/>
-          <input class="tcbr-inp" type="number" min="0" placeholder="Attended"
+          <input class="tcbr-inp" type="number" min="0" placeholder="TCBR attended"
             value="${r.a||''}" onchange="upTCBR(${s.id},${i},'a',this.value)"
             style="-moz-appearance:textfield;"/>
           <button class="tcbr-rm" onclick="rmTCBR(${s.id},${i})" title="Remove">✕</button>
