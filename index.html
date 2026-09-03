@@ -1464,24 +1464,37 @@
       );
       if(!hasAny){toast('Fill in some values first.');return;}
 
-      // Validate: attended must not exceed conducted for any component
+      // Validate: attended + TCBR must not exceed conducted for any component
       let hasError=false;
       subs.forEach(s=>{
         ['L','P','T','S'].forEach(k=>{
-          const av=n(s[k+'a']), tv=n(s[k+'t']);
+          const av  = n(s[k+'a']);
+          const tv  = n(s[k+'t']);
+          // Sum all TCBR attended for this component
+          const tcbrA = (s.tcbr||[]).filter(r=>r.comp===k).reduce((sum,r)=>sum+n(r.a),0);
+          const totalAtt = av + tcbrA;
+
+          // attended alone > conducted
           if(av>0 && tv>0 && av>tv){
             hasError=true;
-            // Shake the attended input for this component
             const aInp=document.getElementById('inp-'+s.id+'-'+k+'a');
             const tInp=document.getElementById('inp-'+s.id+'-'+k+'t');
             shakeInp(aInp);
             if(tInp) tInp.classList.add('err');
           }
+          // attended + TCBR > conducted
+          else if(tv>0 && tcbrA>0 && totalAtt>tv){
+            hasError=true;
+            const aInp=document.getElementById('inp-'+s.id+'-'+k+'a');
+            shakeInp(aInp);
+            toast('⚠ '+s.name+': '+k+' attended + TCBR ('+totalAtt+') exceeds conducted ('+tv+')!');
+          }
         });
       });
 
       if(hasError){
-        toast('⚠ Attended classes cannot exceed conducted — fix the red fields first!');
+        if(!document.querySelector('.num-inp.err ~ .shake'))
+          toast('⚠ Total attended + TCBR cannot exceed conducted — fix highlighted fields!');
         return;
       }
 
@@ -1880,8 +1893,24 @@
     }
     function upTCBR(id,idx,key,val){
       const s=subs.find(s=>s.id===id); if(!s||!s.tcbr) return;
-      if(key==='comp') s.tcbr[idx].comp=val;
-      else if(key==='a') s.tcbr[idx].a=parseFloat(val)||'';
+      if(key==='comp'){
+        s.tcbr[idx].comp=val;
+      } else if(key==='a'){
+        const comp = s.tcbr[idx].comp;
+        const conducted = n(s[comp+'t']);
+        const mainAtt   = n(s[comp+'a']);
+        const newTCBR   = parseFloat(val)||0;
+        // Clamp: attended + TCBR cannot exceed conducted
+        if(conducted>0 && (mainAtt+newTCBR)>conducted){
+          s.tcbr[idx].a = Math.max(0, conducted - mainAtt);
+          // Update the input visually
+          const rows = document.querySelectorAll('#card-'+id+' .tcbr-rows .tcbr-inp');
+          if(rows[idx]) rows[idx].value = s.tcbr[idx].a;
+          toast('⚠ TCBR capped — attended + TCBR cannot exceed conducted ('+conducted+')');
+        } else {
+          s.tcbr[idx].a = newTCBR||'';
+        }
+      }
       if(calculated){calculated=false;setHint(false);}
     }
 
