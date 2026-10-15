@@ -462,6 +462,23 @@
     .feedback-sec{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);padding:24px;margin:28px 0;}
     .feedback-form{}
     .fb-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    /* ── FLOATING CALCULATE BUTTON ── */
+    .float-calc{
+      position:fixed;bottom:28px;right:28px;z-index:800;
+      display:inline-flex;align-items:center;gap:8px;
+      background:var(--safe);color:#07090f;border:none;border-radius:100px;
+      padding:12px 24px;font-size:13px;font-weight:700;cursor:pointer;
+      font-family:'Syne',sans-serif;
+      box-shadow:0 4px 24px rgba(54,214,138,0.4);
+      opacity:0;pointer-events:none;
+      transform:translateY(16px);
+      transition:opacity 0.25s ease, transform 0.25s ease, box-shadow 0.2s;
+    }
+    .float-calc.show{opacity:1;pointer-events:all;transform:translateY(0);}
+    .float-calc:hover{background:#4aeaa0;transform:translateY(-3px);box-shadow:0 8px 32px rgba(54,214,138,0.5);}
+    .float-calc:active{transform:translateY(0);}
+    @media(max-width:480px){.float-calc{bottom:20px;right:16px;padding:11px 20px;font-size:12px;}}
+
     @media(max-width:480px){.fb-row{grid-template-columns:1fr;}}
     .fb-grp{display:flex;flex-direction:column;gap:5px;}
     .fb-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--txt3);}
@@ -585,6 +602,23 @@
       z-index:1000;white-space:nowrap;pointer-events:none;
     }
     .toast.show{transform:translateX(-50%) translateY(0);}
+
+    /* ── FLOATING CALCULATE BUTTON ── */
+    .float-calc{
+      position:fixed;bottom:28px;right:28px;z-index:800;
+      display:inline-flex;align-items:center;gap:8px;
+      background:var(--safe);color:#07090f;border:none;border-radius:100px;
+      padding:12px 24px;font-size:13px;font-weight:700;cursor:pointer;
+      font-family:'Syne',sans-serif;
+      box-shadow:0 4px 24px rgba(54,214,138,0.4);
+      opacity:0;pointer-events:none;
+      transform:translateY(16px);
+      transition:opacity 0.25s ease, transform 0.25s ease, box-shadow 0.2s;
+    }
+    .float-calc.show{opacity:1;pointer-events:all;transform:translateY(0);}
+    .float-calc:hover{background:#4aeaa0;transform:translateY(-3px);box-shadow:0 8px 32px rgba(54,214,138,0.5);}
+    .float-calc:active{transform:translateY(0);}
+    @media(max-width:480px){.float-calc{bottom:20px;right:16px;padding:11px 20px;font-size:12px;}}
 
     @media(max-width:480px){
       .controls{flex-direction:column;align-items:flex-start;}
@@ -1033,6 +1067,16 @@
       </div>
     </footer>
   </div>
+
+  <!-- FLOATING CALCULATE BUTTON -->
+  <button class="float-calc" id="floatCalc" onclick="calculateAll()">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <rect x="1" y="1" width="12" height="12" rx="2.5" stroke="currentColor" stroke-width="1.4"/>
+      <path d="M3.5 4.5h4M3.5 7h5M3.5 9.5h3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+      <circle cx="10.5" cy="3.5" r="1.2" fill="currentColor"/>
+    </svg>
+    Calculate
+  </button>
 
   <div class="toast" id="toast"></div>
 
@@ -1612,15 +1656,26 @@
         const hash = window.location.hash;
         if(!hash || !hash.startsWith('#erp=')) return;
         const encoded = hash.slice(5);
-        const subjects = JSON.parse(decodeURIComponent(escape(atob(encoded))));
-        if(!Array.isArray(subjects) || !subjects.length) return;
-        // Clean hash from URL
+        const parsed = JSON.parse(decodeURIComponent(escape(atob(encoded))));
+        if(!Array.isArray(parsed) || !parsed.length) return;
         history.replaceState(null, '', window.location.pathname);
+        // Expand minified format (short keys) to full format
+        const subjects = parsed.map(m => {
+          if(m.name !== undefined) return m; // old full format
+          return {
+            name: m.n,
+            L:  m.l||[0,0], hasL: !!m.l,
+            P:  m.p||[0,0], hasP: !!m.p,
+            T:  m.t||[0,0], hasT: !!m.t,
+            S:  m.s||[0,0], hasS: !!m.s,
+            tcbr: (m.tc||[]).map(r=>({comp:r.c, a:r.a})),
+          };
+        });
         subs = []; uid = 0;
         subjects.forEach(d => { const s=mk(d); s.fromERP=true; subs.push(s); });
         calculated = true;
         erpLoaded = true;
-      }catch(e){}
+      }catch(e){ console.error('ERP parse error:',e); }
     })();
 
     // ── Only load saved session if NO ERP data came in ──
@@ -1855,6 +1910,22 @@
       const text = encodeURIComponent(SITE_MSG + ' ' + SITE_URL);
       window.open('https://twitter.com/intent/tweet?text=' + text, '_blank');
     }
+
+    // ── FLOATING CALCULATE BUTTON ─────────────────────
+    (function(){
+      const floatBtn = document.getElementById('floatCalc');
+      const controlsEl = document.querySelector('.controls');
+      function updateFloat(){
+        if(!floatBtn || !controlsEl) return;
+        if(controlsEl.getBoundingClientRect().bottom < 0){
+          floatBtn.classList.add('show');
+        } else {
+          floatBtn.classList.remove('show');
+        }
+      }
+      window.addEventListener('scroll', updateFloat, {passive:true});
+      updateFloat();
+    })();
 
     // ── THEME TOGGLE ──────────────────────────────
     function toggleTheme(){
